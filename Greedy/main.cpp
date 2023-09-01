@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-
+#include "greedy.cpp"
 using namespace std;
 
 // Leer archivo de entrada
@@ -30,8 +30,6 @@ string get_file_name(int argc, char* argv[]) {
 int main(int argc, char* argv[]) {
     string file_name = get_file_name(argc, argv);
     vector<string> lines = read_file(file_name);
-    for (const auto& line : lines) {
-        cout << line << endl;
-    }
+    greedy(lines);
     return 0;
 }
