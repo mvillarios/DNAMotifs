@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <vector>
-#include "greedy.cpp"
+#include "funciones.h"
 using namespace std;
 
 // Leer archivo de entrada
