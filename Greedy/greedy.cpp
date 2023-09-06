@@ -20,7 +20,7 @@ int menorValorDna(const std::vector<int>& count){//modificar en caso de igualdad
 
 int greedy(vector<string> s){
     std::vector<char> dna = {'A', 'C', 'G', 'T'};
-    std::vector<int> count = {0, 0, 0, 0};
+
     int x = 15;
     int tam_s = s.size();
 
