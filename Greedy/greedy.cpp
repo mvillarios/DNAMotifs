@@ -6,19 +6,29 @@ using namespace std;
 
 //para compilar:g++ main.cpp greedy.cpp -o main.exe
 
-int menorValorDna(const std::vector<int>& count){//modificar en caso de igualdades
+int menorValorDna(const std::vector<int>& count,float disc){//modificar en caso de igualdades
     if(count.empty()) return -1;// si esta vacio
     int minIndex = 0; 
+
     for (int i = 1; i < count.size(); ++i) {
         if (count[i] < count[minIndex]) {
             minIndex = i;
+        }
+        else if(count[i] == count[minIndex]){
+            int aux = std::rand();
+            // Convertir el número entero a un float en el rango [0, 1]
+            float random_float = static_cast<float>(aux) / RAND_MAX;
+            if(random_float>disc){
+                minIndex = i;
+            }
         }
     }
     return minIndex;//retorna el index del menor valor
 }
 
 
-int greedy(vector<string> s){
+int greedy(vector<string> s,float disc)
+{
     std::vector<char> dna = {'A', 'C', 'G', 'T'};
 
     int x = 15;
@@ -59,7 +69,7 @@ int greedy(vector<string> s){
             }
             cout<<endl;
         }    
-        int next = menorValorDna(count);//Se calcula la letra que añadira menos distancia
+        int next = menorValorDna(count,disc);//Se calcula la letra que añadira menos distancia
         cout<<"mejor: "<<dna[next]<<endl;
         respuesta.push_back(dna[next]);// y se añade a la respuesta
         for(int s=0;s<tam_s;s++){
