@@ -1,29 +1,35 @@
 #include <iostream>
 #include <fstream>
 #include "funciones.h"
+#include <ctime>
 
 using namespace std;
 
 //para compilar:g++ main.cpp greedy.cpp -o main.exe
 
-int menorValorDna(const std::vector<int>& count,float disc){//modificar en caso de igualdades
-    if(count.empty()) return -1;// si esta vacio
-    int minIndex = 0; 
+int menorValorDna(const std::vector<int>& count) {
+    if (count.empty()) return -1; // Si está vacío
+
+    int minIndex = 0;
+    std::vector<int> indices;
 
     for (int i = 1; i < count.size(); ++i) {
         if (count[i] < count[minIndex]) {
             minIndex = i;
-        }
-        else if(count[i] == count[minIndex]){
-            int aux = std::rand();
-            // Convertir el número entero a un float en el rango [0, 1]
-            float random_float = static_cast<float>(aux) / RAND_MAX;
-            if(random_float>disc){
-                minIndex = i;
-            }
+            indices.clear(); // Nuevo valor mínimo encontrado, restablecer los índices
+        } else if (count[i] == count[minIndex]) {
+            indices.push_back(i); // Agregar índice al vector de índices iguales
         }
     }
-    return minIndex;//retorna el index del menor valor
+
+    if (!indices.empty()) {
+        // Si hay varios elementos con el mismo valor mínimo, elige uno al azar
+        srand(time(0)); // Inicializa la semilla para rand() usando el tiempo actual
+        int randomIndex = rand() % (indices.size()); // Genera un índice aleatorio
+        return indices[randomIndex];
+    }
+
+    return minIndex; // Retorna el índice del menor valor
 }
 
 
@@ -69,7 +75,7 @@ int greedy(vector<string> s,float disc)
             }
             cout<<endl;
         }    
-        int next = menorValorDna(count,disc);//Se calcula la letra que añadira menos distancia
+        int next = menorValorDna(count);//Se calcula la letra que añadira menos distancia
         cout<<"mejor: "<<dna[next]<<endl;
         respuesta.push_back(dna[next]);// y se añade a la respuesta
         for(int s=0;s<tam_s;s++){
