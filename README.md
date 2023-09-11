@@ -3,12 +3,16 @@
 Proyecto para Sistemas Adaptativos
 
 
-Para compilar se tiene que compilar el archivo main.cpp y el archivo greedy.cpp (recordar estar en la carpeta Greedy)
+Para compilar se tiene que compilar el archivo greedy.cpp o greedy_prob.cpp y el archivo funciones.cpp (recordar estar en la carpeta Greedy)
 
- - g++ main.cpp greedy.cpp -o main.exe
+ - g++ greedy_prob.cpp funciones.cpp -o greedy_prob
+ - g++ greedy.cpp funciones.cpp -o greedy
 
-Y para ejecutar se agrega el archivo con las intancias
+Y para ejecutar se usa el ejecutable y el nombre del archivo
 
- - .\main.exe test.txt
+ - .\greedy.exe -i <nombre archivo>
+ - .\greedy_prob.exe -i <nombre archivo> <alpha>
 
+En el greedy probabilistico se necesita agregar un numero entre 0 y 1.
+Si no se agregan los parametros se les pide por consola 
  
