@@ -38,7 +38,7 @@ int greedy(vector<string> s)
 {
     std::vector<char> dna = {'A', 'C', 'G', 'T'}; //Nucleotidos (Sigma(E griega))
 
-    int m = 7; // Tamaño de los fragmentos de ADN (m)
+    int m = 15; // Tamaño de los fragmentos de ADN (m)
     int tam_s = s.size();// Tamaño de la secuencia total (U)
 
     //almacena la distancia de cada S_i hasta el momento
