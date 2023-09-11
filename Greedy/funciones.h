@@ -4,6 +4,6 @@
 #include <vector>
 #include <string> 
 
-int greedy(std::vector<std::string> s, float disc);
+int greedy(std::vector<std::string> s);
 
 #endif

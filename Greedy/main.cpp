@@ -32,6 +32,6 @@ int main(int argc, char* argv[]) {
     std::srand(std::time(NULL));
     string file_name = get_file_name(argc, argv);
     vector<string> lines = read_file(file_name);
-    greedy(lines,0.1);
+    greedy(lines);
     return 0;
 }
