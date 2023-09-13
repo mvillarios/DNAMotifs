@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <chrono>
+#include <tuple>
 
 using namespace std;
 
@@ -46,8 +47,9 @@ int menorValorDna(const std::vector<int>& count, float alpha) {
 
 // Función que implementa el algoritmo Greedy
 // Recibe un vector de strings con las secuencias de ADN
-// Retorna el valor total de la distancia de cada secuencia a la respuesta
-int greedy(vector<string> s, float alpha) {
+// Retorna un par con el valor objetivo y el tiempo de ejecución
+typedef tuple<int, long long> ResultadoGreedy;
+ResultadoGreedy greedy(vector<string> s, float alpha) {
     std::vector<char> dna = {'A', 'C', 'G', 'T'}; //Nucleotidos (Sigma(E griega))
 
     int m = 15; // Tamaño de los fragmentos de ADN (m)
@@ -66,6 +68,8 @@ int greedy(vector<string> s, float alpha) {
     std::vector<char> respuesta;
 
     auto start_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de inicio
+
+    //clock_t start_time = clock();
 
     for (int j = 0; j < m; j++){ // recorre cada columna
         for (int k = 0; k < 4; k++){ // se prueba con todas las letras A-C-G-T
@@ -126,7 +130,14 @@ int greedy(vector<string> s, float alpha) {
     }
 
     auto end_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de finalización
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+
+    // clock_t end_time = clock(); // Marcar el tiempo de finalización
+    // double duration = double(end_time - start_time) / CLOCKS_PER_SEC; // Calcular la duración en segundos
+
+    // cout<<"distancia: ";
+    // for(int i=0;i<distancia_s_i.size();i++) cout<<distancia_s_i[i]<<" ";
+    // cout<<""<<endl;
 
     // cout<<"respuesta: ";
     // for(int i=0;i<respuesta.size();i++) cout<<respuesta[i];
@@ -135,9 +146,12 @@ int greedy(vector<string> s, float alpha) {
     // Total
     int total = 0;
     for (int i = 0; i < tam_s; i++) total += distancia_s_i[i] * distancia_s_i[i];
-    cout << "Valor objetivo: " << total << endl;
-    cout << "Tiempo de ejecución: " << duration.count() << " ms" << endl;
-    return 0;
+    // cout << "Valor objetivo: " << total << endl;
+    // cout << "Tiempo de ejecucion: " << duration.count() << " us" << endl;
+
+    //cout << total << " " << duration.count() << endl;
+
+    return make_tuple(total, duration.count());
 }
 
 // Lee el archivo y retorna un vector de strings con las secuencias de ADN
