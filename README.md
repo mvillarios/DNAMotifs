@@ -15,11 +15,12 @@ Y para ejecutar se usa el ejecutable y el nombre del archivo (o el path a la car
 
     .\greedy_prob.exe -i <nombre archivo> <alpha>
 
-Ejemplo con la carpeta Instancias
+Ejemplo con la carpeta Instancias desde la carpeta Greedy
 
      .\greedy.exe -i ..\Instancias\inst_200_15_4_0.txt
 
 En el greedy probabilistico se necesita agregar un numero alpha entre 0 y 1.
 
 Si no se agregan los parametros se les pide por consola.
- 
+
+El codigo imprime en consola el Valor Objetivo y el Tiempo de Ejecución.
