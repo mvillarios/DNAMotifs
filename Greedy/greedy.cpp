@@ -18,8 +18,8 @@ int main(int argc, char* argv[]) {
     vector<string> lines = read_file(file_name);
     ResultadoGreedy resultado = greedy(lines, 0);
 
-    cout << "Valor objetivo: " << get<0>(resultado) << endl; // Valor objetivo
-    cout << "Tiempo de ejecucion: " << get<1>(resultado) << " us" << endl; // Tiempo de ejecucion
+    cout << get<0>(resultado) << endl; // Valor objetivo
+    cout << get<1>(resultado) << endl; // Tiempo de ejecucion
 
 
     // // Obtener el promedio y la desviación estándar de todas las instancias
