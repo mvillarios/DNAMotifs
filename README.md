@@ -23,4 +23,4 @@ En el greedy probabilistico se necesita agregar un numero alpha entre 0 y 1.
 
 Si no se agregan los parametros se les pide por consola.
 
-El codigo imprime en consola el Valor Objetivo y el Tiempo de Ejecución.
+El codigo imprime en consola el Valor Objetivo y el Tiempo de Ejecución (en microsegundos).
