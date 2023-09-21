@@ -33,7 +33,6 @@ int main(int argc, char* argv[]) {
         string file_name = "../Instancias/inst_200_15_4_" + to_string(i) + ".txt";
         vector<string> lines = read_file(file_name);
         ResultadoGreedy resultado = greedy(lines, 0);
-        cout << get<0>(resultado) << endl;
         total.push_back(get<0>(resultado));
         promedio += get<0>(resultado);
     }
