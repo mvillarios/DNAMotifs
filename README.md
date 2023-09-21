@@ -11,13 +11,13 @@ Para compilar se tiene que compilar el archivo greedy.cpp o greedy_prob.cpp y el
 
 Y para ejecutar se usa el ejecutable y el nombre del archivo (o el path a la carpeta donde estan las instancias)
 
-    .\greedy.exe -i <nombre archivo>
+    ./greedy.exe -i <nombre archivo>
 
-    .\greedy_prob.exe -i <nombre archivo> <alpha>
+    ./greedy_prob.exe -i <nombre archivo> <alpha>
 
 Ejemplo con la carpeta Instancias desde la carpeta Greedy
 
-     .\greedy.exe -i ..\Instancias\inst_200_15_4_0.txt
+     ./greedy.exe -i ../Instancias/inst_200_15_4_0.txt
 
 En el greedy probabilistico se necesita agregar un numero alpha entre 0 y 1.
 
