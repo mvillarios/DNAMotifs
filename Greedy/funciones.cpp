@@ -69,6 +69,7 @@ ResultadoGreedy greedy(vector<string> s, float alpha) {
 
     auto start_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de inicio
 
+    //clock_t start_time = clock();
 
     for (int j = 0; j < m; j++){ // recorre cada columna
         for (int k = 0; k < 4; k++){ // se prueba con todas las letras A-C-G-T
@@ -93,6 +94,26 @@ ResultadoGreedy greedy(vector<string> s, float alpha) {
             distancia_s_i[i] = matriz_aux[i][next];
         }
 
+        //  ----Impresiones en consola para ver el funcionamiento del algoritmo ----
+        // cout<<"-----------Columna "<<j<<" ------------"<<endl;
+        // for (int k = 0; k < 4; k++) cout<<count[k]<<" ";
+        // cout<<""<<endl;
+        // cout<<"A C G T"<<endl;    
+
+        // for (int i = 0; i < tam_s; i++){
+        //     for (int k = 0; k < 4; k++) cout<<matriz_aux[i][k]<<" ";
+        //     cout<<""<<endl;
+        // }
+
+        // cout<<"Mejor: "<<dna[next]<<endl;
+    
+        // for (int i = 0; i < tam_s; i++){
+        //     cout<<"s"<<i<<": "<<distancia_s_i[i]<<" ";
+        //     cout<<""<<endl;
+        // }
+        
+        // //  ------------------ Terminan Impresiones
+
         //Se cambian los valores de la matriz auxiliar por los de la distancia del mejor nucleotido
         for (int i = 0; i < tam_s; i++){
             for (int k = 0; k < 4; k++) matriz_aux[i][k] = distancia_s_i[i];
@@ -100,14 +121,35 @@ ResultadoGreedy greedy(vector<string> s, float alpha) {
         // Se reinicia el vector count
         for (int k = 0; k < 4; k++) count[k] = 0;
 
+        // // Imprime la matriz auxiliar
+        // cout<<"Matriz auxiliar"<<endl;
+        // for (int i = 0; i < tam_s; i++){
+        //     for (int k = 0; k < 4; k++) cout<<matriz_aux[i][k]<<" ";
+        //     cout<<""<<endl;
+        // }
     }
 
     auto end_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de finalización
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+
+    // clock_t end_time = clock(); // Marcar el tiempo de finalización
+    // double duration = double(end_time - start_time) / CLOCKS_PER_SEC; // Calcular la duración en segundos
+
+    // cout<<"distancia: ";
+    // for(int i=0;i<distancia_s_i.size();i++) cout<<distancia_s_i[i]<<" ";
+    // cout<<""<<endl;
+
+    // cout<<"respuesta: ";
+    // for(int i=0;i<respuesta.size();i++) cout<<respuesta[i];
+    // cout<<""<<endl;
     
     // Total
     int total = 0;
     for (int i = 0; i < tam_s; i++) total += distancia_s_i[i] * distancia_s_i[i];
+    // cout << "Valor objetivo: " << total << endl;
+    // cout << "Tiempo de ejecucion: " << duration.count() << " us" << endl;
+
+    //cout << total << " " << duration.count() << endl;
 
     return make_tuple(total, duration.count());
 }
