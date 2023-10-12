@@ -222,3 +222,24 @@ float get_alpha(int argc, char* argv[]) {
 
     return alpha;
 }
+
+bool extractValues(string filePath, int& inst, int& m, int& l) {
+
+    size_t lastSlash = filePath.find_last_of('/');
+    std::string fileName = filePath.substr(lastSlash + 1);
+
+    if (sscanf(fileName.c_str(), "inst_%d_%d_4_%d", &m, &l, &inst) == 3) {
+        return true;
+    } else {
+        std::cerr << "No se pudieron extraer los valores del nombre del archivo." << std::endl;
+        return false;
+    }
+}
+
+
+
+
+
+
+
+

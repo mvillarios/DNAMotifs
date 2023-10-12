@@ -21,7 +21,13 @@ int main(int argc, char* argv[]) {
 
     metaheuristica(lines);
 
-    /*
+    std::ofstream file("data.txt", std::ofstream::trunc);
+    
+    file.seekp(0, std::ios::end);
+    if (file.tellp() == 0) {
+        file << "inst\tm\tl\tgreedy\tmh\n";
+    }
+
     int menor = 0;
     cout << "Valor objetivo" << endl;
 
@@ -44,9 +50,10 @@ int main(int argc, char* argv[]) {
         } 
     }
 
+    file << inst << '\t' << m << '\t' << lines << '\t' << menor << '\t' << mh << '\n';
     cout << "Valor final: " << menor <<endl;
     cout << "Valor real: " << 23673 << endl;
-    */
+    
 
     return 0;
 }
