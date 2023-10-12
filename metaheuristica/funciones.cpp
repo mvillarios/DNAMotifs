@@ -53,7 +53,7 @@ typedef tuple<int, long long> ResultadoGreedy;
 std::string  greedy(vector<string> s, float alpha) {
     std::vector<char> dna = {'A', 'C', 'G', 'T'}; //Nucleotidos (Sigma(E griega))
 
-    int m = 100; // Tamaño de los fragmentos de ADN (m)
+    int m = 15; // Tamaño de los fragmentos de ADN (m)
     int tam_s = s.size();// Tamaño de la secuencia total (U)
 
     //almacena la distancia de cada S_i hasta el momento
@@ -136,7 +136,7 @@ void metaheuristica(std::vector<std::string> s) {
 
     cout<< "Inicia algoritmo"<<endl;
     const int num_init_sol = 10;
-    const int m = 100;
+    const int m = 15;
     int best_dist = std::numeric_limits<int>::max();
     std::string best_sol;
 
@@ -154,9 +154,13 @@ void metaheuristica(std::vector<std::string> s) {
         // Map de mejores soluciones con la solución y su distancia
         std::map<std::string, int> mejores_soluciones;
 
+        cout << "Inicia For" << endl;
         for (int i = 0; i < num_init_sol; ++i) { // Recorremos soluciones iniciales
-            sol_actual = solucion_inicial;
-            dist_actual = dist_solucion_inicial;
+            sol_actual = greedy(s, 1);
+            dist_actual = calcularDistancia(sol_actual, s);
+
+            cout << "Solucion inicial: " << sol_actual << endl;
+            cout << "Distancia inicial: " << dist_actual << endl;
 
             for (size_t j = 0; j < m; j++) {
                 // Intenta cambiar el carácter en la posición j solo con A, T, C, G.
@@ -166,14 +170,19 @@ void metaheuristica(std::vector<std::string> s) {
                     nueva_solucion[j] = c;
                     int nueva_dist = calcularDistancia(nueva_solucion, s);
                     if (nueva_dist < dist_actual) {
-                        sol_actual = nueva_solucion;
                         dist_actual = nueva_dist;
+                        sol_actual = nueva_solucion;
+
+                        cout << "Nueva solucion: " << sol_actual << endl;
+                        cout << "Nueva distancia: " << dist_actual << endl;
                     }
                 }
             }
             mejores_soluciones.insert(std::pair<std::string, int>(sol_actual, dist_actual));
+            cout << "Inserta en mejor sol" << endl;
         }
-    
+        cout << "Termina For" << endl;
+
         // Elige la mejor solución entre mejores_soluciones
         for (const auto& x : mejores_soluciones) {
             if (x.second < dist_actual) {
@@ -183,10 +192,10 @@ void metaheuristica(std::vector<std::string> s) {
         }
         // Termina el algoritmo de búsqueda local
 
-        std::cout << "Puede ser" << std::endl;
-        std::cout << "Valor: " << dist_actual << std::endl;
-        std::cout << "Solucion: " << sol_actual << std::endl;
-        std::cout << std::endl;
+        // std::cout << "Puede ser" << std::endl;
+        // std::cout << "Valor: " << dist_actual << std::endl;
+        // std::cout << "Solucion: " << sol_actual << std::endl;
+        // std::cout << std::endl;
 
         if (best_sol.empty() || dist_actual < best_dist) {
             best_dist = dist_actual;
@@ -197,6 +206,8 @@ void metaheuristica(std::vector<std::string> s) {
             std::cout << "Solucion: " << best_sol << std::endl;
             std::cout << std::endl;
         }
+
+        cout << "Termina while" << endl;
     }
 
     std::cout << "----------Valores Finales-------------" << std::endl;
