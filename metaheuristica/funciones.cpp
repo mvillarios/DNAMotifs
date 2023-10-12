@@ -6,6 +6,7 @@
 #include <cstring>
 #include <chrono>
 #include <tuple>
+#include <map>
 
 using namespace std;
 
@@ -131,47 +132,77 @@ int calcularDistancia(const std::string& str, const std::vector<std::string>& da
     g++ greedy_prob.cpp funciones.cpp -o greedy_prob.exe    
     ./greedy_prob.exe -i ../nuevo_dataset/inst_1000_100_4_0.txt
 */
-void metaheuristica(std::vector<std::string> s){
-    int num_init_sol = 10;
-    std::vector<string> init_sol;
-    
+void metaheuristica(std::vector<std::string> s) {
 
-    int dist_act;
+    cout<< "Inicia algoritmo"<<endl;
+    const int num_init_sol = 10;
+    const int m = 100;
+    int best_dist = std::numeric_limits<int>::max();
+    std::string best_sol;
 
-    for(int i=0;i<num_init_sol;i++) init_sol.push_back(greedy(s,1));//generamos soluciones iniciales aleatorias
+    auto start_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de inicio
 
-    for(int i=0;i<num_init_sol;i++) cout<<init_sol[i]<< "   distancia: "<<calcularDistancia(init_sol[i],s)<<endl;//print soluciones inciales
-    
-    int mejor_dist = calcularDistancia(init_sol[0], s); //almacena la menor distancia hasta el momento
-    std::string mejor_respuesta = init_sol[0];//almacena respuesta con la menor distancia hasta el momento
-    
+    while (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start_time).count() < 60) {
+        std::string solucion_inicial = greedy(s, 1);
+        int dist_solucion_inicial = calcularDistancia(solucion_inicial, s);
 
-    cout<<endl<<endl<<endl;
+        std::string sol_actual = solucion_inicial;
+        int dist_actual = dist_solucion_inicial;
 
+        // Inicia el algoritmo de búsqueda local
 
-    for(int i=0;i<num_init_sol;i++){//recorrimos soluciones iniciales
-        
-        std::string solucion_actual = init_sol[i];
+        // Map de mejores soluciones con la solución y su distancia
+        std::map<std::string, int> mejores_soluciones;
 
-        for (size_t j = 0; j < solucion_actual.size(); j++) {
-            // Intenta cambiar el carácter en la posición j solo con A, T, C, G.
-            for (char c : {'A', 'T', 'C', 'G'}) {
-                if (solucion_actual[j] != c) {
-                    std::string nuevaSolucion = solucion_actual;
-                    nuevaSolucion[j] = c;
-                    int nuevaDistancia = calcularDistancia(nuevaSolucion, s);
-                    if (nuevaDistancia <= mejor_dist) {
-                        mejor_respuesta = nuevaSolucion;
-                        mejor_dist = nuevaDistancia;
-                        cout<< mejor_respuesta<<"       distancia: "<<mejor_dist<<endl;
+        for (int i = 0; i < num_init_sol; ++i) { // Recorremos soluciones iniciales
+            sol_actual = solucion_inicial;
+            dist_actual = dist_solucion_inicial;
+
+            for (size_t j = 0; j < m; j++) {
+                // Intenta cambiar el carácter en la posición j solo con A, T, C, G.
+                for (char c : {'A', 'T', 'C', 'G'}) {
+                    if (sol_actual[j] == c) continue;
+                    std::string nueva_solucion = sol_actual;
+                    nueva_solucion[j] = c;
+                    int nueva_dist = calcularDistancia(nueva_solucion, s);
+                    if (nueva_dist < dist_actual) {
+                        sol_actual = nueva_solucion;
+                        dist_actual = nueva_dist;
                     }
                 }
             }
+            mejores_soluciones.insert(std::pair<std::string, int>(sol_actual, dist_actual));
+        }
+    
+        // Elige la mejor solución entre mejores_soluciones
+        for (const auto& x : mejores_soluciones) {
+            if (x.second < dist_actual) {
+                dist_actual = x.second;
+                sol_actual = x.first;
+            }
+        }
+        // Termina el algoritmo de búsqueda local
+
+        std::cout << "Puede ser" << std::endl;
+        std::cout << "Valor: " << dist_actual << std::endl;
+        std::cout << "Solucion: " << sol_actual << std::endl;
+        std::cout << std::endl;
+
+        if (best_sol.empty() || dist_actual < best_dist) {
+            best_dist = dist_actual;
+            best_sol = sol_actual;
+
+            std::cout << "Mejor hasta el momento" << std::endl;
+            std::cout << "Valor: " << best_dist << std::endl;
+            std::cout << "Solucion: " << best_sol << std::endl;
+            std::cout << std::endl;
         }
     }
-    
 
-
+    std::cout << "----------Valores Finales-------------" << std::endl;
+    std::cout << "Valor final: " << best_dist << std::endl;
+    std::cout << "Valor real: " << 23673 << std::endl;
+    std::cout << "Solucion: " << best_sol << std::endl;
 }
 
 // Lee el archivo y retorna un vector de strings con las secuencias de ADN
