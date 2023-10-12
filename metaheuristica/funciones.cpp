@@ -126,7 +126,11 @@ int calcularDistancia(const std::string& str, const std::vector<std::string>& da
     }
     return costoTotal;
 }
-
+/*
+    Para ejecutar:
+    g++ greedy_prob.cpp funciones.cpp -o greedy_prob.exe    
+    ./greedy_prob.exe -i ../nuevo_dataset/inst_1000_100_4_0.txt
+*/
 void metaheuristica(std::vector<std::string> s){
     int num_init_sol = 10;
     std::vector<string> init_sol;
