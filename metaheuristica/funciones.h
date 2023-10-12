@@ -13,5 +13,6 @@ std::string get_file_name(int argc, char* argv[]);
 float get_alpha(int argc, char* argv[]);
 void metaheuristica(std::vector<std::string> s);
 bool extractValues(string filePath, int& inst, int& m, int& l);
-
+void close_data(ofstream &file);
+void clear_data(string file_name);
 #endif  // FUNCIONES_H
