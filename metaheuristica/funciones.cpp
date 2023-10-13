@@ -10,6 +10,8 @@
 
 using namespace std;
 
+typedef tuple<int, long long> Resultado;
+
 // Función que retorna el índice del menor valor de un vector
 // Si hay varios elementos con el mismo valor mínimo, elige uno al azar
 // Si alpha > 0, retorna un índice al azar con probabilidad alpha
@@ -49,11 +51,10 @@ int menorValorDna(const std::vector<int>& count, float alpha) {
 // Función que implementa el algoritmo Greedy
 // Recibe un vector de strings con las secuencias de ADN
 // Retorna un par con el valor objetivo y el tiempo de ejecución
-typedef tuple<int, long long> ResultadoGreedy;
-std::string  greedy(vector<string> s, float alpha) {
+std::tuple<int, std::vector<char>> greedy(vector<string> s, float alpha, int tam_string) {
     std::vector<char> dna = {'A', 'C', 'G', 'T'}; //Nucleotidos (Sigma(E griega))
 
-    int m = 15; // Tamaño de los fragmentos de ADN (m)
+    int m = tam_string; // Tamaño de los fragmentos de ADN (m)
     int tam_s = s.size();// Tamaño de la secuencia total (U)
 
     //almacena la distancia de cada S_i hasta el momento
@@ -110,8 +111,7 @@ std::string  greedy(vector<string> s, float alpha) {
     int total = 0;
     for (int i = 0; i < tam_s; i++) total += distancia_s_i[i] * distancia_s_i[i];
 
-    std::string aux (respuesta.begin(),respuesta.end());
-    return aux;
+    return std::make_tuple(total, respuesta);
 }
 
 int calcularDistancia(const std::string& str, const std::vector<std::string>& dataset) {
@@ -127,27 +127,28 @@ int calcularDistancia(const std::string& str, const std::vector<std::string>& da
     }
     return costoTotal;
 }
-/*
-    Para ejecutar:
-    g++ greedy_prob.cpp funciones.cpp -o greedy_prob.exe    
-    ./greedy_prob.exe -i ../nuevo_dataset/inst_1000_100_4_0.txt
-*/
-void metaheuristica(std::vector<std::string> s) {
+
+// Función que implementa el algoritmo de búsqueda local con Grasp
+// Recibe un vector de strings con las secuencias de ADN
+// Retorna un par con el valor objetivo y el tiempo de ejecución
+std::tuple<int, long long> grasp(std::vector<std::string> s, int tam_string, int n_sol_ini, int t_limite) {
 
     cout<< "Inicia algoritmo"<<endl;
-    const int num_init_sol = 10;
-    const int m = 15;
+    int num_init_sol = n_sol_ini;
+    int m = tam_string;
     int best_dist = std::numeric_limits<int>::max();
     std::string best_sol;
 
     auto start_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de inicio
+    std::chrono::seconds duration;
 
-    while (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start_time).count() < 60) {
-        std::string solucion_inicial = greedy(s, 1);
-        int dist_solucion_inicial = calcularDistancia(solucion_inicial, s);
+    while (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start_time).count() < t_limite) {
+        // Genera una solución inicial aleatoria usando el algoritmo Greedy
+        std::vector<char> solucion_inicial;
+        int dist_solucion_inicial;
 
-        std::string sol_actual = solucion_inicial;
-        int dist_actual = dist_solucion_inicial;
+        std::string sol_actual;
+        int dist_actual;
 
         // Inicia el algoritmo de búsqueda local
 
@@ -156,8 +157,9 @@ void metaheuristica(std::vector<std::string> s) {
 
         cout << "Inicia For" << endl;
         for (int i = 0; i < num_init_sol; ++i) { // Recorremos soluciones iniciales
-            sol_actual = greedy(s, 1);
-            dist_actual = calcularDistancia(sol_actual, s);
+            std::tie(dist_solucion_inicial, solucion_inicial) = greedy(s, 1);
+            sol_actual = string(solucion_inicial.begin(), solucion_inicial.end());
+            dist_actual = dist_solucion_inicial;
 
             cout << "Solucion inicial: " << sol_actual << endl;
             cout << "Distancia inicial: " << dist_actual << endl;
@@ -205,6 +207,11 @@ void metaheuristica(std::vector<std::string> s) {
             std::cout << "Valor: " << best_dist << std::endl;
             std::cout << "Solucion: " << best_sol << std::endl;
             std::cout << std::endl;
+
+            auto end_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de finalización
+            duration = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
+
+            std::cout << "Tiempo: " << duration.count() << std::endl;
         }
 
         cout << "Termina while" << endl;
@@ -214,6 +221,8 @@ void metaheuristica(std::vector<std::string> s) {
     std::cout << "Valor final: " << best_dist << std::endl;
     std::cout << "Valor real: " << 23673 << std::endl;
     std::cout << "Solucion: " << best_sol << std::endl;
+
+    return make_tuple(best_dist, duration.count());
 }
 
 // Lee el archivo y retorna un vector de strings con las secuencias de ADN
@@ -250,18 +259,16 @@ string get_file_name(int argc, char* argv[]) {
 // Obtiene el valor de alpha
 float get_alpha(int argc, char* argv[]) {
     float alpha = 0;
-    if (argc > 3) {
+    if (argc > 3 && strcmp(argv[3],"-a") == 0) {
         alpha = atof(argv[3]);
     } else {
         cout << "Ingrese el valor de alpha: ";
         cin >> alpha;
     }
-
     if (alpha < 0 || alpha > 1) {
         cerr << "Error: El valor de alpha debe estar entre 0 y 1." << endl;
         exit(1);
     }
-
     return alpha;
 }
 
