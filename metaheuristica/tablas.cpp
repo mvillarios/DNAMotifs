@@ -16,16 +16,23 @@ int main(int argc, char* argv[]) {
 
     vector<string> lines = read_file(file_name);
 
-    int t_limite = get_t_limite(argc, argv);
+    float alpha = get_alpha(argc, argv);
+
+    std::ofstream file("data.txt", std::ofstream::app);
 
     int inst, m, l;
 
     extractValues(file_name, inst, m, l);
 
-    std::tuple<int, long long> res2 = grasp(lines, l, t_limite);
+    int t_limite = 60;
+    int tam_string = l;
 
-    cout << std::get<0>(res2) << endl; // Valor objetivo
-    cout << std::get<1>(res2) << endl; // Tiempo de ejecucion
+    std::tuple<int, std::vector<char>> res = greedy(lines, alpha, tam_string);
+    std::tuple<int, long long> res2 = grasp(lines, tam_string, t_limite);
 
+    save_data(file, inst, m, l, std::get<0>(res), std::get<0>(res2));
+
+
+    file.close();
     return 0;
 }

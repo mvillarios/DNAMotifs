@@ -10,8 +10,6 @@
 
 using namespace std;
 
-typedef tuple<int, long long> Resultado;
-
 // Función que retorna el índice del menor valor de un vector
 // Si hay varios elementos con el mismo valor mínimo, elige uno al azar
 // Si alpha > 0, retorna un índice al azar con probabilidad alpha
@@ -52,6 +50,7 @@ int menorValorDna(const std::vector<int>& count, float alpha) {
 // Recibe un vector de strings con las secuencias de ADN
 // Retorna un par con el valor objetivo y el tiempo de ejecución
 std::tuple<int, std::vector<char>> greedy(vector<string> s, float alpha, int tam_string) {
+
     std::vector<char> dna = {'A', 'C', 'G', 'T'}; //Nucleotidos (Sigma(E griega))
 
     int m = tam_string; // Tamaño de los fragmentos de ADN (m)
@@ -80,28 +79,23 @@ std::tuple<int, std::vector<char>> greedy(vector<string> s, float alpha, int tam
                 }
             }
         }
-
         // Se calcula la distancia de cada letra en cada S_i
         // Esto sirve para buscar la letra que añada menos distancia
         for (int i = 0; i < tam_s; i++){
             for (int k = 0; k < 4; k++) count[k] += matriz_aux[i][k] * matriz_aux[i][k];
         }
-
         int next = menorValorDna(count, alpha);//Se calcula la letra que añadira menos distancia
         respuesta.push_back(dna[next]);// y se añade a la respuesta
-
         // Se guarda la distancia del mejor nucleotido
         for (int i = 0; i < tam_s; i++){
             distancia_s_i[i] = matriz_aux[i][next];
         }
-
         //Se cambian los valores de la matriz auxiliar por los de la distancia del mejor nucleotido
         for (int i = 0; i < tam_s; i++){
             for (int k = 0; k < 4; k++) matriz_aux[i][k] = distancia_s_i[i];
         }
         // Se reinicia el vector count
         for (int k = 0; k < 4; k++) count[k] = 0;
-
     }
 
     auto end_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de finalización
@@ -110,6 +104,8 @@ std::tuple<int, std::vector<char>> greedy(vector<string> s, float alpha, int tam
     // Total
     int total = 0;
     for (int i = 0; i < tam_s; i++) total += distancia_s_i[i] * distancia_s_i[i];
+
+    //std::cout << "Solucion: " << std::string(respuesta.begin(), respuesta.end()) << std::endl;
 
     return std::make_tuple(total, respuesta);
 }
@@ -131,10 +127,9 @@ int calcularDistancia(const std::string& str, const std::vector<std::string>& da
 // Función que implementa el algoritmo de búsqueda local con Grasp
 // Recibe un vector de strings con las secuencias de ADN
 // Retorna un par con el valor objetivo y el tiempo de ejecución
-std::tuple<int, long long> grasp(std::vector<std::string> s, int tam_string, int n_sol_ini, int t_limite) {
+std::tuple<int, long long> grasp(std::vector<std::string> s, int tam_string, int t_limite) {
 
-    cout<< "Inicia algoritmo"<<endl;
-    int num_init_sol = n_sol_ini;
+    int num_init_sol = 30;
     int m = tam_string;
     int best_dist = std::numeric_limits<int>::max();
     std::string best_sol;
@@ -143,7 +138,6 @@ std::tuple<int, long long> grasp(std::vector<std::string> s, int tam_string, int
     std::chrono::seconds duration;
 
     while (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start_time).count() < t_limite) {
-        // Genera una solución inicial aleatoria usando el algoritmo Greedy
         std::vector<char> solucion_inicial;
         int dist_solucion_inicial;
 
@@ -155,17 +149,13 @@ std::tuple<int, long long> grasp(std::vector<std::string> s, int tam_string, int
         // Map de mejores soluciones con la solución y su distancia
         std::map<std::string, int> mejores_soluciones;
 
-        cout << "Inicia For" << endl;
         for (int i = 0; i < num_init_sol; ++i) { // Recorremos soluciones iniciales
-            std::tie(dist_solucion_inicial, solucion_inicial) = greedy(s, 1);
+            // Genera una solución inicial aleatoria usando el algoritmo Greedy
+            std::tie(dist_solucion_inicial, solucion_inicial) = greedy(s, 1, m);
             sol_actual = string(solucion_inicial.begin(), solucion_inicial.end());
             dist_actual = dist_solucion_inicial;
 
-            cout << "Solucion inicial: " << sol_actual << endl;
-            cout << "Distancia inicial: " << dist_actual << endl;
-
             for (size_t j = 0; j < m; j++) {
-                // Intenta cambiar el carácter en la posición j solo con A, T, C, G.
                 for (char c : {'A', 'T', 'C', 'G'}) {
                     if (sol_actual[j] == c) continue;
                     std::string nueva_solucion = sol_actual;
@@ -174,16 +164,11 @@ std::tuple<int, long long> grasp(std::vector<std::string> s, int tam_string, int
                     if (nueva_dist < dist_actual) {
                         dist_actual = nueva_dist;
                         sol_actual = nueva_solucion;
-
-                        cout << "Nueva solucion: " << sol_actual << endl;
-                        cout << "Nueva distancia: " << dist_actual << endl;
                     }
                 }
             }
             mejores_soluciones.insert(std::pair<std::string, int>(sol_actual, dist_actual));
-            cout << "Inserta en mejor sol" << endl;
         }
-        cout << "Termina For" << endl;
 
         // Elige la mejor solución entre mejores_soluciones
         for (const auto& x : mejores_soluciones) {
@@ -194,33 +179,16 @@ std::tuple<int, long long> grasp(std::vector<std::string> s, int tam_string, int
         }
         // Termina el algoritmo de búsqueda local
 
-        // std::cout << "Puede ser" << std::endl;
-        // std::cout << "Valor: " << dist_actual << std::endl;
-        // std::cout << "Solucion: " << sol_actual << std::endl;
-        // std::cout << std::endl;
-
         if (best_sol.empty() || dist_actual < best_dist) {
             best_dist = dist_actual;
             best_sol = sol_actual;
 
-            std::cout << "Mejor hasta el momento" << std::endl;
-            std::cout << "Valor: " << best_dist << std::endl;
-            std::cout << "Solucion: " << best_sol << std::endl;
-            std::cout << std::endl;
-
             auto end_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de finalización
             duration = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
-
-            std::cout << "Tiempo: " << duration.count() << std::endl;
         }
-
-        cout << "Termina while" << endl;
     }
 
-    std::cout << "----------Valores Finales-------------" << std::endl;
-    std::cout << "Valor final: " << best_dist << std::endl;
-    std::cout << "Valor real: " << 23673 << std::endl;
-    std::cout << "Solucion: " << best_sol << std::endl;
+    //std::cout << "Solucion: " << best_sol << std::endl;
 
     return make_tuple(best_dist, duration.count());
 }
@@ -244,32 +212,69 @@ vector<string> read_file(const string& file_name) {
     return lines;
 }
 
-// Obtiene el nombre del archivo
+// Obtener el nombre del archivo
 string get_file_name(int argc, char* argv[]) {
     string file_name;
-    if (argc > 2 && strcmp(argv[1],"-i") == 0) {
-        file_name = argv[2];
-    } else {
-        cout << "Ingrese el nombre del archivo: ";
-        cin >> file_name;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-i") == 0) {
+            file_name = argv[i + 1];
+            return file_name;
+        }
     }
+    
+    cout << "Ingrese el nombre del archivo: ";
+    cin >> file_name;
     return file_name;
 }
 
-// Obtiene el valor de alpha
+// Obtener el valor de alpha
 float get_alpha(int argc, char* argv[]) {
     float alpha = 0;
-    if (argc > 3 && strcmp(argv[3],"-a") == 0) {
-        alpha = atof(argv[3]);
-    } else {
-        cout << "Ingrese el valor de alpha: ";
-        cin >> alpha;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-a") == 0) {
+            alpha = atof(argv[i + 1]);
+            if (alpha < 0 || alpha > 1) {
+                cerr << "Error: El valor de alpha debe estar entre 0 y 1." << endl;
+                exit(1);
+            }
+            return alpha;
+        }
     }
+    
+    cout << "Ingrese el valor de alpha: ";
+    cin >> alpha;
+    
     if (alpha < 0 || alpha > 1) {
         cerr << "Error: El valor de alpha debe estar entre 0 y 1." << endl;
         exit(1);
     }
+    
     return alpha;
+}
+
+// Obtener el tiempo límite de ejecución del grasp
+int get_t_limite(int argc, char* argv[]) {
+    int t_limite = 0;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-t") == 0) {
+            t_limite = atoi(argv[i + 1]);
+            if (t_limite < 0) {
+                cerr << "Error: El tiempo límite debe ser mayor a 0." << endl;
+                exit(1);
+            }
+            return t_limite;
+        }
+    }
+    
+    cout << "Ingrese el tiempo límite de ejecución: ";
+    cin >> t_limite;
+    
+    if (t_limite < 0) {
+        cerr << "Error: El tiempo límite debe ser mayor a 0." << endl;
+        exit(1);
+    }
+    
+    return t_limite;
 }
 
 bool extractValues(string filePath, int& inst, int& m, int& l) {
@@ -285,7 +290,7 @@ bool extractValues(string filePath, int& inst, int& m, int& l) {
     }
 }
 
-void save_data(ofstream &file, int inst, int m, int l, int greedy, long long mh) {
+void save_data(std::ofstream &file, int inst, int m, int l, int greedy, long long mh) {
 
     if (!file.is_open()) {
         std::cerr << "Error al abrir el archivo." << std::endl;
