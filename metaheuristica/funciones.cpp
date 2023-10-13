@@ -264,3 +264,43 @@ float get_alpha(int argc, char* argv[]) {
 
     return alpha;
 }
+
+bool extractValues(string filePath, int& inst, int& m, int& l) {
+
+    size_t lastSlash = filePath.find_last_of('/');
+    std::string fileName = filePath.substr(lastSlash + 1);
+
+    if (sscanf(fileName.c_str(), "inst_%d_%d_4_%d", &m, &l, &inst) == 3) {
+        return true;
+    } else {
+        std::cerr << "No se pudieron extraer los valores del nombre del archivo." << std::endl;
+        return false;
+    }
+}
+
+void save_data(ofstream &file, int inst, int m, int l, int greedy, long long mh) {
+
+    if (!file.is_open()) {
+        std::cerr << "Error al abrir el archivo." << std::endl;
+        return;
+    }
+
+    // Comprueba si el archivo está vacío
+    file.seekp(0, std::ios::end);
+    if (file.tellp() == 0) {
+        file << "inst\tm\tl\tgreedy\tmh\n";
+    }
+
+    // Escribe los datos en el archivo
+    file << inst << '\t' << m << '\t' << l << '\t' << greedy << '\t' << mh << '\n';
+}
+
+
+void close_data(ofstream &file){
+    file.close();
+}
+
+void clear_data(std::string file_name){
+    std::ofstream file(file_name, std::ofstream::trunc);
+    file.close();
+}
