@@ -34,4 +34,4 @@ Para ejecutar
 
     ./tablas.exe -a <Alpha para el greedy> -t <Tiempo de ejecucion del Grasp>
 
-Guarda todos los valores obtenidos en un archivo data.txt e imprime un resumen con los promedios segun el tamaño de m y l. Cuidado porque el dataset donde se busca es en un lugar especifico si no esta en el mismo path que en el codigo, este puede fallar.
+Guarda todos los valores obtenidos en un archivo data.txt. Cuidado porque el dataset donde se busca es en un lugar especifico si no esta en el mismo path que en el codigo, este puede fallar.
