@@ -3,7 +3,7 @@
 Proyecto para Sistemas Adaptativos
 
 
-Para compilar se tiene que compilar el archivo grasp.cpp y el archivo funciones.cpp (recordar estar en la carpeta Metaheuristica)
+Para compilar se tiene que compilar el archivo grasp.cpp y el archivo funciones.cpp (recordar estar en la carpeta Grasp)
 
     g++ grasp.cpp funciones.cpp -o grasp
 
@@ -11,7 +11,7 @@ Y para ejecutar se usa el ejecutable y el nombre del archivo con el tiempo que s
 
     ./grasp.exe -i <nombre archivo> -t <tiempo de ejecucion>
 
-Ejemplo con la carpeta Dataset desde la carpeta Metaheuristica con tiempo de ejecucion 60 segundos
+Ejemplo con la carpeta Dataset desde la carpeta Grasp con tiempo de ejecucion 60 segundos
 
     ./grasp.exe -i ../Dataset/inst_200_15_4_0.txt -t 60
 
