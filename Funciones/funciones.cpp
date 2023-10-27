@@ -316,3 +316,44 @@ void clear_data(std::string file_name){
     std::ofstream file(file_name, std::ofstream::trunc);
     file.close();
 }
+
+void allInst (int t_limite, float alpha){
+
+    cout << "Ejecutando todas las instancias..." << endl;
+    int inst = 100;
+    std::vector<int> m = {200, 500, 1000};
+    std::vector<int> l = {15, 100, 300, 500};
+
+    
+    // Ciclo que recorre solo las primeras 100 instancias con m = 200 y l = 15
+    for (int k = 0; k < inst; k++){
+        std::string file_name = "../Dataset/inst_" + std::to_string(m[0]) + "_" + std::to_string(l[0]) + "_4_" + std::to_string(k) + ".txt";
+        std::vector<std::string> lines = read_file(file_name);
+
+        std::tuple<int, std::vector<char>> res1 = greedy(lines, alpha, l[0]);
+        std::tuple<int, long long> res2 = grasp(lines, l[0], t_limite);
+
+        std::ofstream file("../Test/resultados_total.txt", std::ios::app);
+        save_data(file, k, m[0], l[0], std::get<0>(res1), std::get<0>(res2));
+        close_data(file);
+    }
+
+
+    // Ciclo que recorres las demas instancias
+    for (int i = 1; i < m.size(); i++){
+        for (int j = 1; j < l.size(); j++){
+            for (int k = 0; k < inst; k++){
+                std::string file_name = "../Dataset/inst_" + std::to_string(m[i]) + "_" + std::to_string(l[j]) + "_4_" + std::to_string(k) + ".txt";
+                std::vector<std::string> lines = read_file(file_name);
+
+                std::tuple<int, std::vector<char>> res1 = greedy(lines, alpha, l[j]);
+                std::tuple<int, long long> res2 = grasp(lines, l[j], t_limite);
+
+
+                std::ofstream file("../Test/resultados_total.txt", std::ios::app);
+                save_data(file, k, m[i], l[j], std::get<0>(res1), std::get<0>(res2));
+                close_data(file);
+            }
+        }
+    }
+}

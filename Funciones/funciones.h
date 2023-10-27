@@ -18,4 +18,5 @@ bool extractValues(std::string filePath, int& inst, int& m, int& l);
 void close_data(std::ofstream &file);
 void save_data(std::ofstream &file, int inst, int m, int l, int res1, long long res2);
 void clear_data(std::string file_name);
+void allInst (int t_limite, float alpha);
 #endif  // FUNCIONES_H

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "funciones.h"
+#include "../Funciones/funciones.h"
 #include <ctime>
 #include <tuple>
 #include <cmath>
@@ -22,10 +22,10 @@ int main(int argc, char* argv[]) {
 
     extractValues(file_name, inst, m, l);
 
-    std::tuple<int, long long> res2 = grasp(lines, l, t_limite);
+    std::tuple<int, long long> res = grasp(lines, l, t_limite);
 
-    cout << std::get<0>(res2) << endl; // Valor objetivo
-    cout << std::get<1>(res2) << endl; // Tiempo de ejecucion
+    cout << std::get<0>(res) << endl; // Valor objetivo
+    cout << std::get<1>(res) << endl; // Tiempo de ejecucion
 
     return 0;
 }
