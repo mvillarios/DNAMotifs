@@ -7,6 +7,7 @@
 #include <chrono>
 #include <tuple>
 #include <map>
+#include <unordered_map>
 
 using namespace std;
 
@@ -357,3 +358,102 @@ void allInst (int t_limite, float alpha){
         }
     }
 }
+
+std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, int tam_poblacion, int t_limite) {
+    int n = tam_poblacion;
+    int m = tam_string;
+    int tam_s = s.size();
+
+    std::vector<std::string> poblacion_inicial;
+    std::vector<int> distancias_poblacion_inicial;
+
+    // Genera una población inicial aleatoria
+    for (int i = 0; i < n; ++i) {
+        std::string cromosoma;
+        for (int j = 0; j < m; ++j) {
+            cromosoma += "ACGT"[rand() % 4];
+        }
+        poblacion_inicial.push_back(cromosoma);
+        distancias_poblacion_inicial.push_back(calcularDistancia(cromosoma, s));
+    }
+
+    // Selecciona individuos de la población por torneo
+    std::vector<int> seleccionados; // Vector que guarda los indices de los individuos seleccionados
+    int num_seleccionados = n * 0.5; // Numero de individuos seleccionados
+
+    for (int i = 0; i < num_seleccionados; ++i) {
+        int index1 = rand() % n;
+        int index2 = rand() % n;
+        int seleccionado = 0;
+        if (distancias_poblacion_inicial[index1] < distancias_poblacion_inicial[index2]) {
+            seleccionado = index1;
+        } else {
+            seleccionado = index2;
+        }
+
+        seleccionados.push_back(seleccionado);
+    }
+
+    // Cruza los individuos seleccionados
+    std::vector<std::string> hijos;
+    for (int i = 0; i < num_seleccionados - 1; i += 2) {
+        std::string hijo1 = poblacion_inicial[seleccionados[i]].substr(0, m / 2) + poblacion_inicial[seleccionados[i + 1]].substr(m / 2, m / 2);
+        std::string hijo2 = poblacion_inicial[seleccionados[i + 1]].substr(0, m / 2) + poblacion_inicial[seleccionados[i]].substr(m / 2, m / 2);
+        hijos.push_back(hijo1);
+        hijos.push_back(hijo2);
+    }
+
+    // Si quedó un individuo sin cruzar (cuando num_seleccionados es impar), puedes manejarlo de la forma que desees, por ejemplo, copiar el último individuo tal como está o aplicar alguna otra estrategia de tu algoritmo.
+    if (num_seleccionados % 2 != 0) {
+        hijos.push_back(poblacion_inicial[seleccionados[num_seleccionados - 1]]);
+    }
+
+    // Mutación
+    for (int i = 0; i < num_seleccionados; ++i) {
+        int index = rand() % m;
+        int index2 = rand() % 4;
+        hijos[i][index] = "ACGT"[index2];
+    }
+
+    // Reemplazo los hijos en la población inicial
+    // Elimino los individuos con mayor distancia
+    // Y lo reemplazo por los hijos
+
+    // Calculo la distancia de los hijos
+    std::vector<int> distancias_hijos;
+    for (int i = 0; i < num_seleccionados; ++i) {
+        distancias_hijos.push_back(calcularDistancia(hijos[i], s));
+    }
+
+    // Reemplazo los individuos con mayor distancia
+    for (int i = 0; i < num_seleccionados; ++i) {
+        int max_index = 0;
+        for (int j = 0; j < n; ++j) {
+            if (distancias_poblacion_inicial[j] > distancias_poblacion_inicial[max_index]) {
+                max_index = j;
+            }
+        }
+        poblacion_inicial[max_index] = hijos[i];
+        distancias_poblacion_inicial[max_index] = distancias_hijos[i];
+    }
+
+    // Busco el mejor hasta el momento
+    int best_index = 0;
+    for (int i = 0; i < n; ++i) {
+        if (distancias_poblacion_inicial[i] < distancias_poblacion_inicial[best_index]) {
+            best_index = i;
+        }
+    }
+
+    std::string best_sol = poblacion_inicial[best_index];
+    int best_dist = distancias_poblacion_inicial[best_index];
+
+    // Imprimo el mejor hasta el momento
+    std::cout << "Mejor hasta el momento: " << best_sol << std::endl;
+    std::cout << "Distancia: " << best_dist << std::endl;
+
+    return std::make_tuple(0, 0);
+}
+
+// Tengo una duda de en que momento deberia iniciar el tiempo de ejecucion con el while para el tiempo
+// Deberia ir creando todo el rato una nueva poblacion aleatoria o deberia ir avanzando con la misma poblacion y sus hijos.

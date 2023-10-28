@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 int menorValorDna(const std::vector<int>& count, float alpha);
 int calcularDistancia(const std::string& str, const std::vector<std::string>& dataset);
@@ -19,4 +20,7 @@ void close_data(std::ofstream &file);
 void save_data(std::ofstream &file, int inst, int m, int l, int res1, long long res2);
 void clear_data(std::string file_name);
 void allInst (int t_limite, float alpha);
+
+
+std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, int tam_poblacion, int t_limite);
 #endif  // FUNCIONES_H
