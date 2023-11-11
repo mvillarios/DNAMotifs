@@ -15,6 +15,8 @@ std::string get_file_name(int argc, char* argv[]);
 int get_tam_string(int argc, char* argv[]);
 float get_alpha(int argc, char* argv[]);
 int get_t_limite(int argc, char* argv[]);
+int get_tam_poblacion(int argc, char* argv[]);
+bool get_tunning(int argc, char* argv[]);
 bool extractValues(std::string filePath, int& inst, int& m, int& l);
 void close_data(std::ofstream &file);
 void save_data(std::ofstream &file, int inst, int m, int l, int res1, long long res2);
@@ -22,5 +24,5 @@ void clear_data(std::string file_name);
 void allInst (int t_limite, float alpha);
 
 
-std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, int tam_poblacion, int t_limite);
+std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, int tam_poblacion, int t_limite, bool tunning);
 #endif  // FUNCIONES_H

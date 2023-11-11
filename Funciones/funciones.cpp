@@ -278,6 +278,42 @@ int get_t_limite(int argc, char* argv[]) {
     return t_limite;
 }
 
+bool get_tunning(int argc, char* argv[]){
+    bool tunning = false;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-tunning") == 0) {
+            tunning = atoi(argv[i + 1]);
+        }
+    }
+    return tunning;
+}
+
+int get_tam_poblacion(int argc, char* argv[]){
+    int pobl_inicial = 0;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-p") == 0) {
+            pobl_inicial = atoi(argv[i + 1]);
+            if (pobl_inicial < 0) {
+                cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+                exit(1);
+            }
+            return pobl_inicial;
+        }
+    }
+    
+    cout << "Ingrese el tamaño de la población inicial: ";
+    cin >> pobl_inicial;
+    
+    if (pobl_inicial < 0) {
+        cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+        exit(1);
+    }
+    
+    return pobl_inicial;
+
+}
+
+
 bool extractValues(string filePath, int& inst, int& m, int& l) {
 
     size_t lastSlash = filePath.find_last_of('/');
@@ -359,7 +395,7 @@ void allInst (int t_limite, float alpha){
     }
 }
 
-std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, int tam_poblacion, int t_limite) {
+std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, int tam_poblacion, int t_limite, bool tunning) {
     int n = tam_poblacion;
     int m = tam_string;
     int tam_s = s.size();
@@ -367,6 +403,8 @@ std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, 
     std::vector<std::string> poblacion_inicial;
     std::vector<int> distancias_poblacion_inicial;
 
+    auto start_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de inicio   
+    
     // Genera una población inicial aleatoria
     for (int i = 0; i < n; ++i) {
         std::string cromosoma;
@@ -376,83 +414,100 @@ std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, 
         poblacion_inicial.push_back(cromosoma);
         distancias_poblacion_inicial.push_back(calcularDistancia(cromosoma, s));
     }
+    
+    std::string best_sol = "";
+    int best_dist = -1;
+    long long best_time = -1;
 
-    // Selecciona individuos de la población por torneo
-    std::vector<int> seleccionados; // Vector que guarda los indices de los individuos seleccionados
-    int num_seleccionados = n * 0.5; // Numero de individuos seleccionados
 
-    for (int i = 0; i < num_seleccionados; ++i) {
-        int index1 = rand() % n;
-        int index2 = rand() % n;
-        int seleccionado = 0;
-        if (distancias_poblacion_inicial[index1] < distancias_poblacion_inicial[index2]) {
-            seleccionado = index1;
-        } else {
-            seleccionado = index2;
+    while ( std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start_time).count() < t_limite){
+
+        // Selecciona individuos de la población por torneo
+        std::vector<int> seleccionados; // Vector que guarda los indices de los individuos seleccionados
+        int num_seleccionados = n * 0.5; // Numero de individuos seleccionados
+
+        for (int i = 0; i < num_seleccionados; ++i) {
+            int index1 = rand() % n;
+            int index2 = rand() % n;
+            int seleccionado = 0;
+            if (distancias_poblacion_inicial[index1] < distancias_poblacion_inicial[index2]) {
+                seleccionado = index1;
+            } else {
+                seleccionado = index2;
+            }
+
+            seleccionados.push_back(seleccionado);
         }
 
-        seleccionados.push_back(seleccionado);
-    }
+        // Cruza los individuos seleccionados
+        std::vector<std::string> hijos;
+        for (int i = 0; i < num_seleccionados - 1; i += 2) {
+            std::string hijo1 = poblacion_inicial[seleccionados[i]].substr(0, m / 2) + poblacion_inicial[seleccionados[i + 1]].substr(m / 2, m / 2);
+            std::string hijo2 = poblacion_inicial[seleccionados[i + 1]].substr(0, m / 2) + poblacion_inicial[seleccionados[i]].substr(m / 2, m / 2);
+            hijos.push_back(hijo1);
+            hijos.push_back(hijo2);
+        }
 
-    // Cruza los individuos seleccionados
-    std::vector<std::string> hijos;
-    for (int i = 0; i < num_seleccionados - 1; i += 2) {
-        std::string hijo1 = poblacion_inicial[seleccionados[i]].substr(0, m / 2) + poblacion_inicial[seleccionados[i + 1]].substr(m / 2, m / 2);
-        std::string hijo2 = poblacion_inicial[seleccionados[i + 1]].substr(0, m / 2) + poblacion_inicial[seleccionados[i]].substr(m / 2, m / 2);
-        hijos.push_back(hijo1);
-        hijos.push_back(hijo2);
-    }
+        // Si quedó un individuo sin cruzar (cuando num_seleccionados es impar)
+        if (num_seleccionados % 2 != 0) {
+            hijos.push_back(poblacion_inicial[seleccionados[num_seleccionados - 1]]);
+        }
 
-    // Si quedó un individuo sin cruzar (cuando num_seleccionados es impar), puedes manejarlo de la forma que desees, por ejemplo, copiar el último individuo tal como está o aplicar alguna otra estrategia de tu algoritmo.
-    if (num_seleccionados % 2 != 0) {
-        hijos.push_back(poblacion_inicial[seleccionados[num_seleccionados - 1]]);
-    }
+        // Mutación
+        for (int i = 0; i < num_seleccionados; ++i) {
+            int index = rand() % m;
+            int index2 = rand() % 4;
+            hijos[i][index] = "ACGT"[index2];
+        }
 
-    // Mutación
-    for (int i = 0; i < num_seleccionados; ++i) {
-        int index = rand() % m;
-        int index2 = rand() % 4;
-        hijos[i][index] = "ACGT"[index2];
-    }
+        // Reemplazo los hijos en la población inicial
+        // Elimino los individuos con mayor distancia
+        // Y lo reemplazo por los hijos
 
-    // Reemplazo los hijos en la población inicial
-    // Elimino los individuos con mayor distancia
-    // Y lo reemplazo por los hijos
+        // Calculo la distancia de los hijos
+        std::vector<int> distancias_hijos;
+        for (int i = 0; i < num_seleccionados; ++i) {
+            distancias_hijos.push_back(calcularDistancia(hijos[i], s));
+        }
 
-    // Calculo la distancia de los hijos
-    std::vector<int> distancias_hijos;
-    for (int i = 0; i < num_seleccionados; ++i) {
-        distancias_hijos.push_back(calcularDistancia(hijos[i], s));
-    }
+        // Reemplazo los individuos con mayor distancia
+        for (int i = 0; i < num_seleccionados; ++i) {
+            int max_index = 0;
+            for (int j = 0; j < n; ++j) {
+                if (distancias_poblacion_inicial[j] > distancias_poblacion_inicial[max_index]) {
+                    max_index = j;
+                }
+            }
+            poblacion_inicial[max_index] = hijos[i];
+            distancias_poblacion_inicial[max_index] = distancias_hijos[i];
+        }
 
-    // Reemplazo los individuos con mayor distancia
-    for (int i = 0; i < num_seleccionados; ++i) {
-        int max_index = 0;
-        for (int j = 0; j < n; ++j) {
-            if (distancias_poblacion_inicial[j] > distancias_poblacion_inicial[max_index]) {
-                max_index = j;
+        // Busco el mejor hasta el momento
+        int best_index = 0;
+        for (int i = 0; i < n; ++i) {
+            if (distancias_poblacion_inicial[i] < distancias_poblacion_inicial[best_index]) {
+                best_index = i;
             }
         }
-        poblacion_inicial[max_index] = hijos[i];
-        distancias_poblacion_inicial[max_index] = distancias_hijos[i];
-    }
 
-    // Busco el mejor hasta el momento
-    int best_index = 0;
-    for (int i = 0; i < n; ++i) {
-        if (distancias_poblacion_inicial[i] < distancias_poblacion_inicial[best_index]) {
-            best_index = i;
+        auto end_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de finalización
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
+
+        // Si es mejor que el mejor hasta el momento, lo guardo
+        if (tunning || best_sol.empty() || distancias_poblacion_inicial[best_index] < best_dist) {
+            best_sol = poblacion_inicial[best_index];
+            best_dist = distancias_poblacion_inicial[best_index];
+            best_time = duration.count();
+
+            std::cout << "Solucion: " << best_sol << std::endl;
+            std::cout << "Distancia: " << best_dist << std::endl;
+            std::cout << "Tiempo: " << duration.count() << std::endl;
         }
+
     }
 
-    std::string best_sol = poblacion_inicial[best_index];
-    int best_dist = distancias_poblacion_inicial[best_index];
 
-    // Imprimo el mejor hasta el momento
-    std::cout << "Mejor hasta el momento: " << best_sol << std::endl;
-    std::cout << "Distancia: " << best_dist << std::endl;
-
-    return std::make_tuple(0, 0);
+    return std::make_tuple(best_dist, best_time);
 }
 
 // Tengo una duda de en que momento deberia iniciar el tiempo de ejecucion con el while para el tiempo

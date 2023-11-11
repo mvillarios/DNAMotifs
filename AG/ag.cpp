@@ -16,12 +16,21 @@ int main(int argc, char* argv[]) {
 
     vector<string> lines = read_file(file_name);
 
+    int pobl_inicial = get_tam_poblacion(argc, argv);
+
+    int t_limite = get_t_limite(argc, argv);
+
+    bool tunning = get_tunning(argc, argv);
 
     int inst, m, l;
 
     extractValues(file_name, inst, m, l);
 
-    std::tuple<int, long long> res = genetico(lines, l, 50, 10);
+    std::tuple<int, long long> res = genetico(lines, l, pobl_inicial, t_limite, tunning);
+
+    // Imprimo el resultado
+    cout << "Resultado Final: " << std::get<0>(res) << endl;
+    cout << "Tiempo Final: " << std::get<1>(res) << endl;
 
     return 0;
 }
