@@ -494,14 +494,16 @@ std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, 
         auto duration = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
 
         // Si es mejor que el mejor hasta el momento, lo guardo
-        if (tunning || best_sol.empty() || distancias_poblacion_inicial[best_index] < best_dist) {
+        if (best_sol.empty() || distancias_poblacion_inicial[best_index] < best_dist) {
             best_sol = poblacion_inicial[best_index];
             best_dist = distancias_poblacion_inicial[best_index];
             best_time = duration.count();
 
-            std::cout << "Solucion: " << best_sol << std::endl;
-            std::cout << "Distancia: " << best_dist << std::endl;
-            std::cout << "Tiempo: " << duration.count() << std::endl;
+            if (tunning){
+                std::cout << "Solucion: " << best_sol << std::endl;
+                std::cout << "Distancia: " << best_dist << std::endl;
+                std::cout << "Tiempo: " << duration.count() << std::endl;
+            }
         }
 
     }
