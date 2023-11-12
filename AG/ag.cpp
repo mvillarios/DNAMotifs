@@ -29,8 +29,12 @@ int main(int argc, char* argv[]) {
     std::tuple<int, long long> res = genetico(lines, l, pobl_inicial, t_limite, tunning);
 
     // Imprimo el resultado
-    cout << "Resultado Final: " << std::get<0>(res) << endl;
-    cout << "Tiempo Final: " << std::get<1>(res) << endl;
+    if(tunning){
+        cout << "Resultado Final: " << std::get<0>(res) << endl;
+        cout << "Tiempo Final: " << std::get<1>(res) << endl;
+    }else{
+        cout << std::get<0>(res) << endl;
+    }
 
     return 0;
 }
