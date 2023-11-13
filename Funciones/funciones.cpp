@@ -395,7 +395,7 @@ void allInst (int t_limite, float alpha){
     }
 }
 
-std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, int tam_poblacion, int t_limite, bool tunning) {
+std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, int tam_poblacion, float alpha, int t_limite, bool tunning) {
     int n = tam_poblacion;
     int m = tam_string;
     int tam_s = s.size();
@@ -455,9 +455,14 @@ std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, 
 
         // Mutación
         for (int i = 0; i < num_seleccionados; ++i) {
-            int index = rand() % m;
-            int index2 = rand() % 4;
-            hijos[i][index] = "ACGT"[index2];
+            //Probabilidad de mutación
+            // Si se cumple la probabilidad alpha, se muta
+            if ((float)rand()/RAND_MAX < alpha) {
+                // Selecciona un índice al azar
+                int index = rand() % m;
+                int index2 = rand() % 4;
+                hijos[i][index] = "ACGT"[index2];
+            }
         }
 
         // Reemplazo los hijos en la población inicial

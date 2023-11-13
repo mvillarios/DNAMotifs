@@ -24,5 +24,5 @@ void clear_data(std::string file_name);
 void allInst (int t_limite, float alpha);
 
 
-std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, int tam_poblacion, int t_limite, bool tunning);
+std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, int tam_poblacion, float alpha, int t_limite, bool tunning);
 #endif  // FUNCIONES_H

@@ -18,6 +18,8 @@ int main(int argc, char* argv[]) {
 
     int pobl_inicial = get_tam_poblacion(argc, argv);
 
+    float alpha = get_alpha(argc, argv);
+
     int t_limite = get_t_limite(argc, argv);
 
     bool tunning = get_tunning(argc, argv);
@@ -26,7 +28,7 @@ int main(int argc, char* argv[]) {
 
     extractValues(file_name, inst, m, l);
 
-    std::tuple<int, long long> res = genetico(lines, l, pobl_inicial, t_limite, tunning);
+    std::tuple<int, long long> res = genetico(lines, l, pobl_inicial, alpha, t_limite, tunning);
 
     // Imprimo el resultado
     if(tunning){
