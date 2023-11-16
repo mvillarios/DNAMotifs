@@ -128,7 +128,7 @@ int calcularDistancia(const std::string& str, const std::vector<std::string>& da
 // Función que implementa el algoritmo de búsqueda local con Grasp
 // Recibe un vector de strings con las secuencias de ADN
 // Retorna un par con el valor objetivo y el tiempo de ejecución
-std::tuple<int, long long> grasp(std::vector<std::string> s, int tam_string, int t_limite) {
+std::tuple<int, long long> grasp(std::vector<std::string> s, int tam_string, int t_limite, int tunning) {
 
     int num_init_sol = 30;
     int m = tam_string;
@@ -186,6 +186,13 @@ std::tuple<int, long long> grasp(std::vector<std::string> s, int tam_string, int
 
             auto end_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de finalización
             duration = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
+
+
+            if (tunning == false){
+                std::cout << "Solucion: " << best_sol << std::endl;
+                std::cout << "Distancia: " << best_dist << std::endl;
+                std::cout << "Tiempo: " << duration.count() << std::endl;
+            }
         }
     }
 
@@ -313,7 +320,6 @@ int get_tam_poblacion(int argc, char* argv[]){
 
 }
 
-
 bool extractValues(string filePath, int& inst, int& m, int& l) {
 
     size_t lastSlash = filePath.find_last_of('/');
@@ -327,7 +333,7 @@ bool extractValues(string filePath, int& inst, int& m, int& l) {
     }
 }
 
-void save_data(std::ofstream &file, int inst, int m, int l, int greedy, long long mh) {
+void save_data(std::ofstream &file, int inst, int m, int l, int result, long long time) {
 
     if (!file.is_open()) {
         std::cerr << "Error al abrir el archivo." << std::endl;
@@ -337,11 +343,11 @@ void save_data(std::ofstream &file, int inst, int m, int l, int greedy, long lon
     // Comprueba si el archivo está vacío
     file.seekp(0, std::ios::end);
     if (file.tellp() == 0) {
-        file << "inst\tm\tl\tgreedy\tmh\n";
+        file << "inst\tm\tl\tresult\ttime\n";
     }
 
     // Escribe los datos en el archivo
-    file << inst << '\t' << m << '\t' << l << '\t' << greedy << '\t' << mh << '\n';
+    file << inst << '\t' << m << '\t' << l << '\t' << result << '\t' << time << '\n';
 }
 
 
@@ -354,45 +360,56 @@ void clear_data(std::string file_name){
     file.close();
 }
 
-void allInst (int t_limite, float alpha){
+void allInst (int t_limite, float alpha, int tam_poblacion, bool tunning, int m, int l, int algoritmo) {
 
-    cout << "Ejecutando todas las instancias..." << endl;
     int inst = 100;
-    std::vector<int> m = {200, 500, 1000};
-    std::vector<int> l = {15, 100, 300, 500};
+    // std::vector<int> m = {200, 500, 1000};
+    // std::vector<int> l = {15, 100, 300, 500};
 
-    
-    // Ciclo que recorre solo las primeras 100 instancias con m = 200 y l = 15
+    int costo = 0;
+    long long tiempo = 0;
+
+    // Ciclo que recorre todas las instancias
     for (int k = 0; k < inst; k++){
-        std::string file_name = "../Dataset/inst_" + std::to_string(m[0]) + "_" + std::to_string(l[0]) + "_4_" + std::to_string(k) + ".txt";
-        std::vector<std::string> lines = read_file(file_name);
+        std::string file_name = "../Dataset/inst_" + std::to_string(m) + "_" + std::to_string(l) + "_4_" + std::to_string(k) + ".txt";
+        std::vector<std::string> lines = read_file(file_name);   
 
-        std::tuple<int, std::vector<char>> res1 = greedy(lines, alpha, l[0]);
-        std::tuple<int, long long> res2 = grasp(lines, l[0], t_limite);
+        if(algoritmo = 0){
+            std::tuple<int, std::vector<char>> res1 = greedy(lines, alpha, l);
+            std::ofstream file("../Test/resultados_greedy_" + std::to_string(m) + "_" + std::to_string(l) + ".txt", std::ios::app);
+            save_data(file, k, m, l, std::get<0>(res1), 0);
+            close_data(file);
 
-        std::ofstream file("../Test/resultados_total.txt", std::ios::app);
-        save_data(file, k, m[0], l[0], std::get<0>(res1), std::get<0>(res2));
-        close_data(file);
-    }
-
-
-    // Ciclo que recorres las demas instancias
-    for (int i = 1; i < m.size(); i++){
-        for (int j = 1; j < l.size(); j++){
-            for (int k = 0; k < inst; k++){
-                std::string file_name = "../Dataset/inst_" + std::to_string(m[i]) + "_" + std::to_string(l[j]) + "_4_" + std::to_string(k) + ".txt";
-                std::vector<std::string> lines = read_file(file_name);
-
-                std::tuple<int, std::vector<char>> res1 = greedy(lines, alpha, l[j]);
-                std::tuple<int, long long> res2 = grasp(lines, l[j], t_limite);
+            costo += std::get<0>(res1);
 
 
-                std::ofstream file("../Test/resultados_total.txt", std::ios::app);
-                save_data(file, k, m[i], l[j], std::get<0>(res1), std::get<0>(res2));
-                close_data(file);
-            }
+        }else if(algoritmo = 1){
+            std::tuple<int, long long> res2 = grasp(lines, l, t_limite, tunning);
+            std::ofstream file("../Test/resultados_grasp_" + std::to_string(m) + "_" + std::to_string(l) + ".txt", std::ios::app);
+            save_data(file, k, m, l, std::get<0>(res2), std::get<1>(res2));
+            close_data(file);
+
+            costo += std::get<0>(res2);
+            tiempo += std::get<1>(res2);
+
+        }else if(algoritmo = 2){
+            std::tuple<int, long long> res3 = genetico(lines, l, tam_poblacion, alpha, t_limite, tunning);
+            std::ofstream file("../Test/resultados_ag_" + std::to_string(m) + "_" + std::to_string(l) + ".txt", std::ios::app);
+            save_data(file, k, m, l, std::get<0>(res3), std::get<1>(res3));
+            close_data(file);
+
+            costo += std::get<0>(res3);
+            tiempo += std::get<1>(res3);
         }
     }
+
+    costo = costo / inst;
+    tiempo = tiempo / inst;
+
+    cout << "Algoritmo:" << algoritmo << endl;
+    cout << m << l << endl; 
+
+    cout << costo << tiempo << endl;
 }
 
 std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, int tam_poblacion, float alpha, int t_limite, bool tunning) {
@@ -504,7 +521,7 @@ std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, 
             best_dist = distancias_poblacion_inicial[best_index];
             best_time = duration.count();
 
-            if (tunning){
+            if (tunning == false){
                 std::cout << "Solucion: " << best_sol << std::endl;
                 std::cout << "Distancia: " << best_dist << std::endl;
                 std::cout << "Tiempo: " << duration.count() << std::endl;
