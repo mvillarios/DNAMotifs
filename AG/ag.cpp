@@ -16,6 +16,10 @@ int main(int argc, char* argv[]) {
 
     vector<string> lines = read_file(file_name);
 
+    int pobl_inicial = get_tam_poblacion(argc, argv);
+
+    float alpha = get_alpha(argc, argv);
+
     int t_limite = get_t_limite(argc, argv);
 
     bool tunning = get_tunning(argc, argv);
@@ -24,11 +28,14 @@ int main(int argc, char* argv[]) {
 
     extractValues(file_name, inst, m, l);
 
-    std::tuple<int, long long> res = grasp(lines, l, t_limite, tunning);
+    std::tuple<int, long long> res = genetico(lines, l, pobl_inicial, alpha, t_limite, tunning);
 
-    if (tunning == false){
-        cout << std::get<0>(res) << endl; // Valor objetivo
-        cout << std::get<1>(res) << endl; // Tiempo de ejecucion
+    // Imprimo el resultado
+    if(tunning == false){
+        cout << "Resultado Final: " << std::get<0>(res) << endl;
+        cout << "Tiempo Final: " << std::get<1>(res) << endl;
+    }else{
+        cout << std::get<0>(res) << endl;
     }
 
     return 0;

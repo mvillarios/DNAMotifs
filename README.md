@@ -26,27 +26,31 @@ Para compilar se tiene que compilar el archivo grasp.cpp y el archivo funciones.
 
 Y para ejecutar se usa el ejecutable con el tiempo que se quiere ejecutar el grasp y el nombre del archivo(o el path a la carpeta donde estan las instancias)
 
-    ./grasp.exe -i <nombre archivo> -t <tiempo de ejecucion>
+    ./grasp.exe -i <nombre archivo> -t <tiempo de ejecucion> -tunning <0/1>
 
 El codigo imprime en consola el Valor Objetivo y el Tiempo en donde se obtuvo el valor objetivo.
 
-## Test
+## AG
 
-Para compilar se tiene que compilar el archivo test.cpp y el archivo funciones.cpp (recordar estar en la carpeta Test)
+Para compilar se tiene que compilar el archivo ag.cpp y el archivo funciones.cpp (recordar estar en la carpeta AG)
 
-    g++ test.cpp ../Funciones/funciones.cpp -o test
+    g++ ag.cpp ../Funciones/funciones.cpp -o ag
 
-Este codigo al ejecutarse comenzara a probar con Grasp y Greedy todos los archivos de la carpeta Dataset y guardara los resultados en un archivo llamado resultados_total.txt.
+Y para ejecutar se usa el ejecutable con el tiempo que se quiere ejecutar el ag y el nombre del archivo(o el path a la carpeta donde estan las instancias), ademas tiene otros parametros como el tamaño de poblacion y la probabilidad de mutacion.
 
-Para ejecutar se usa el ejecutable con el tiempo que se quiere ejecutar el grasp y el alpha que se quiere usar en el greedy.
+    ./ag.exe -i <nombre archivo> -t <tiempo de ejecucion> -tunning <0/1> -p <tamaño de poblacion> -a <probabilidad de mutacion>
 
-    ./test.exe -t <tiempo de ejecucion> -a <alpha>
+El codigo imprime en consola el Valor Objetivo y el Tiempo en donde se obtuvo el valor objetivo.
 
 ## Indicaciones de uso
 
 El tiempo "-t" debe ser mayor a 0 y tiene que ser en segundos
 
 El alpha "-a" debe ser mayor a 0 y menor a 1
+
+El tamaño de poblacion "-p" debe ser mayor a 0
+
+El tunning "-tunning" debe ser 0 o 1 (0 imprime resultados por consola, 1 no imprime nada)
 
 Si no se agregan los parametros se les pide por consola.
 

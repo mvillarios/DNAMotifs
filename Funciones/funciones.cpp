@@ -7,6 +7,7 @@
 #include <chrono>
 #include <tuple>
 #include <map>
+#include <unordered_map>
 
 using namespace std;
 
@@ -127,7 +128,7 @@ int calcularDistancia(const std::string& str, const std::vector<std::string>& da
 // Función que implementa el algoritmo de búsqueda local con Grasp
 // Recibe un vector de strings con las secuencias de ADN
 // Retorna un par con el valor objetivo y el tiempo de ejecución
-std::tuple<int, long long> grasp(std::vector<std::string> s, int tam_string, int t_limite) {
+std::tuple<int, long long> grasp(std::vector<std::string> s, int tam_string, int t_limite, int tunning) {
 
     int num_init_sol = 30;
     int m = tam_string;
@@ -185,6 +186,13 @@ std::tuple<int, long long> grasp(std::vector<std::string> s, int tam_string, int
 
             auto end_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de finalización
             duration = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
+
+
+            if (tunning == false){
+                std::cout << "Solucion: " << best_sol << std::endl;
+                std::cout << "Distancia: " << best_dist << std::endl;
+                std::cout << "Tiempo: " << duration.count() << std::endl;
+            }
         }
     }
 
@@ -277,6 +285,114 @@ int get_t_limite(int argc, char* argv[]) {
     return t_limite;
 }
 
+bool get_tunning(int argc, char* argv[]){
+    bool tunning = false;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-tunning") == 0) {
+            tunning = atoi(argv[i + 1]);
+        }
+    }
+    return tunning;
+}
+
+int get_tam_poblacion(int argc, char* argv[]){
+    int pobl_inicial = 0;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-p") == 0) {
+            pobl_inicial = atoi(argv[i + 1]);
+            if (pobl_inicial < 0) {
+                cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+                exit(1);
+            }
+            return pobl_inicial;
+        }
+    }
+    
+    cout << "Ingrese el tamaño de la población inicial: ";
+    cin >> pobl_inicial;
+    
+    if (pobl_inicial < 0) {
+        cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+        exit(1);
+    }
+    
+    return pobl_inicial;
+
+}
+
+int get_m (int argc, char* argv[]){
+    int m = 0;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-m") == 0) {
+            m = atoi(argv[i + 1]);
+            if (m < 0) {
+                cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+                exit(1);
+            }
+            return m;
+        }
+    }
+    
+    cout << "Ingrese el tamaño de la población inicial: ";
+    cin >> m;
+    
+    if (m < 0) {
+        cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+        exit(1);
+    }
+    
+    return m;
+}
+
+int get_l (int argc, char* argv[]){
+    int l = 0;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-l") == 0) {
+            l = atoi(argv[i + 1]);
+            if (l < 0) {
+                cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+                exit(1);
+            }
+            return l;
+        }
+    }
+    
+    cout << "Ingrese el tamaño de la población inicial: ";
+    cin >> l;
+    
+    if (l < 0) {
+        cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+        exit(1);
+    }
+    
+    return l;
+}
+
+int get_algoritmo (int argc, char* argv[]){
+    int algoritmo = 0;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-algoritmo") == 0) {
+            algoritmo = atoi(argv[i + 1]);
+            if (algoritmo < 0) {
+                cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+                exit(1);
+            }
+            return algoritmo;
+        }
+    }
+    
+    cout << "Ingrese el tamaño de la población inicial: ";
+    cin >> algoritmo;
+    
+    if (algoritmo < 0) {
+        cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+        exit(1);
+    }
+    
+    return algoritmo;
+}
+
+
 bool extractValues(string filePath, int& inst, int& m, int& l) {
 
     size_t lastSlash = filePath.find_last_of('/');
@@ -290,7 +406,7 @@ bool extractValues(string filePath, int& inst, int& m, int& l) {
     }
 }
 
-void save_data(std::ofstream &file, int inst, int m, int l, int greedy, long long mh) {
+void save_data(std::ofstream &file, int inst, int m, int l, int result, long long time) {
 
     if (!file.is_open()) {
         std::cerr << "Error al abrir el archivo." << std::endl;
@@ -300,11 +416,11 @@ void save_data(std::ofstream &file, int inst, int m, int l, int greedy, long lon
     // Comprueba si el archivo está vacío
     file.seekp(0, std::ios::end);
     if (file.tellp() == 0) {
-        file << "inst\tm\tl\tgreedy\tmh\n";
+        file << "inst\tm\tl\tresult\ttime\n";
     }
 
     // Escribe los datos en el archivo
-    file << inst << '\t' << m << '\t' << l << '\t' << greedy << '\t' << mh << '\n';
+    file << inst << '\t' << m << '\t' << l << '\t' << result << '\t' << time << '\n';
 }
 
 
@@ -317,43 +433,179 @@ void clear_data(std::string file_name){
     file.close();
 }
 
-void allInst (int t_limite, float alpha){
+void allInst (int t_limite, float alpha, int tam_poblacion, bool tunning, int m, int l, int algoritmo) {
 
-    cout << "Ejecutando todas las instancias..." << endl;
     int inst = 100;
-    std::vector<int> m = {200, 500, 1000};
-    std::vector<int> l = {15, 100, 300, 500};
+    // std::vector<int> m = {200, 500, 1000};
+    // std::vector<int> l = {15, 100, 300, 500};
 
-    
-    // Ciclo que recorre solo las primeras 100 instancias con m = 200 y l = 15
+    int costo = 0;
+    long long tiempo = 0;
+
+    // Ciclo que recorre todas las instancias
     for (int k = 0; k < inst; k++){
-        std::string file_name = "../Dataset/inst_" + std::to_string(m[0]) + "_" + std::to_string(l[0]) + "_4_" + std::to_string(k) + ".txt";
-        std::vector<std::string> lines = read_file(file_name);
+        std::string file_name = "../Dataset/inst_" + std::to_string(m) + "_" + std::to_string(l) + "_4_" + std::to_string(k) + ".txt";
+        std::vector<std::string> lines = read_file(file_name);   
 
-        std::tuple<int, std::vector<char>> res1 = greedy(lines, alpha, l[0]);
-        std::tuple<int, long long> res2 = grasp(lines, l[0], t_limite);
+        if(algoritmo == 0){
+            std::tuple<int, std::vector<char>> res1 = greedy(lines, alpha, l);
+            std::ofstream file("../Test/resultados_greedy_" + std::to_string(m) + "_" + std::to_string(l) + ".txt", std::ios::app);
+            save_data(file, k, m, l, std::get<0>(res1), 0);
+            close_data(file);
 
-        std::ofstream file("../Test/resultados_total.txt", std::ios::app);
-        save_data(file, k, m[0], l[0], std::get<0>(res1), std::get<0>(res2));
-        close_data(file);
-    }
-
-
-    // Ciclo que recorres las demas instancias
-    for (int i = 1; i < m.size(); i++){
-        for (int j = 1; j < l.size(); j++){
-            for (int k = 0; k < inst; k++){
-                std::string file_name = "../Dataset/inst_" + std::to_string(m[i]) + "_" + std::to_string(l[j]) + "_4_" + std::to_string(k) + ".txt";
-                std::vector<std::string> lines = read_file(file_name);
-
-                std::tuple<int, std::vector<char>> res1 = greedy(lines, alpha, l[j]);
-                std::tuple<int, long long> res2 = grasp(lines, l[j], t_limite);
+            costo += std::get<0>(res1);
 
 
-                std::ofstream file("../Test/resultados_total.txt", std::ios::app);
-                save_data(file, k, m[i], l[j], std::get<0>(res1), std::get<0>(res2));
-                close_data(file);
-            }
+        }else if(algoritmo == 1){
+            std::tuple<int, long long> res2 = grasp(lines, l, t_limite, tunning);
+            std::ofstream file("../Test/resultados_grasp_" + std::to_string(m) + "_" + std::to_string(l) + ".txt", std::ios::app);
+            save_data(file, k, m, l, std::get<0>(res2), std::get<1>(res2));
+            close_data(file);
+
+            costo += std::get<0>(res2);
+            tiempo += std::get<1>(res2);
+
+        }else if(algoritmo == 2){
+            std::tuple<int, long long> res3 = genetico(lines, l, tam_poblacion, alpha, t_limite, tunning);
+            std::ofstream file("../Test/resultados_ag_" + std::to_string(m) + "_" + std::to_string(l) + ".txt", std::ios::app);
+            save_data(file, k, m, l, std::get<0>(res3), std::get<1>(res3));
+            close_data(file);
+
+            costo += std::get<0>(res3);
+            tiempo += std::get<1>(res3);
         }
     }
+
+    costo = costo / inst;
+    tiempo = tiempo / inst;
+
+    cout << "Algoritmo:" << algoritmo << endl;
+    cout << m << " " <<l << endl; 
+
+    cout << costo << " " <<tiempo << endl;
 }
+
+std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, int tam_poblacion, float alpha, int t_limite, bool tunning) {
+    int n = tam_poblacion;
+    int m = tam_string;
+    int tam_s = s.size();
+
+    std::vector<std::string> poblacion_inicial;
+    std::vector<int> distancias_poblacion_inicial;
+
+    auto start_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de inicio   
+    
+    // Genera una población inicial aleatoria
+    for (int i = 0; i < n; ++i) {
+        std::string cromosoma;
+        for (int j = 0; j < m; ++j) {
+            cromosoma += "ACGT"[rand() % 4];
+        }
+        poblacion_inicial.push_back(cromosoma);
+        distancias_poblacion_inicial.push_back(calcularDistancia(cromosoma, s));
+    }
+    
+    std::string best_sol = "";
+    int best_dist = -1;
+    long long best_time = -1;
+
+
+    while ( std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start_time).count() < t_limite){
+
+        // Selecciona individuos de la población por torneo
+        std::vector<int> seleccionados; // Vector que guarda los indices de los individuos seleccionados
+        int num_seleccionados = n * 0.5; // Numero de individuos seleccionados
+
+        for (int i = 0; i < num_seleccionados; ++i) {
+            int index1 = rand() % n;
+            int index2 = rand() % n;
+            int seleccionado = 0;
+            if (distancias_poblacion_inicial[index1] < distancias_poblacion_inicial[index2]) {
+                seleccionado = index1;
+            } else {
+                seleccionado = index2;
+            }
+
+            seleccionados.push_back(seleccionado);
+        }
+
+        // Cruza los individuos seleccionados
+        std::vector<std::string> hijos;
+        for (int i = 0; i < num_seleccionados - 1; i += 2) {
+            std::string hijo1 = poblacion_inicial[seleccionados[i]].substr(0, m / 2) + poblacion_inicial[seleccionados[i + 1]].substr(m / 2, m / 2);
+            std::string hijo2 = poblacion_inicial[seleccionados[i + 1]].substr(0, m / 2) + poblacion_inicial[seleccionados[i]].substr(m / 2, m / 2);
+            hijos.push_back(hijo1);
+            hijos.push_back(hijo2);
+        }
+
+        // Si quedó un individuo sin cruzar (cuando num_seleccionados es impar)
+        if (num_seleccionados % 2 != 0) {
+            hijos.push_back(poblacion_inicial[seleccionados[num_seleccionados - 1]]);
+        }
+
+        // Mutación
+        for (int i = 0; i < num_seleccionados; ++i) {
+            //Probabilidad de mutación
+            // Si se cumple la probabilidad alpha, se muta
+            if ((float)rand()/RAND_MAX < alpha) {
+                // Selecciona un índice al azar
+                int index = rand() % m;
+                int index2 = rand() % 4;
+                hijos[i][index] = "ACGT"[index2];
+            }
+        }
+
+        // Reemplazo los hijos en la población inicial
+        // Elimino los individuos con mayor distancia
+        // Y lo reemplazo por los hijos
+
+        // Calculo la distancia de los hijos
+        std::vector<int> distancias_hijos;
+        for (int i = 0; i < num_seleccionados; ++i) {
+            distancias_hijos.push_back(calcularDistancia(hijos[i], s));
+        }
+
+        // Reemplazo los individuos con mayor distancia
+        for (int i = 0; i < num_seleccionados; ++i) {
+            int max_index = 0;
+            for (int j = 0; j < n; ++j) {
+                if (distancias_poblacion_inicial[j] > distancias_poblacion_inicial[max_index]) {
+                    max_index = j;
+                }
+            }
+            poblacion_inicial[max_index] = hijos[i];
+            distancias_poblacion_inicial[max_index] = distancias_hijos[i];
+        }
+
+        // Busco el mejor hasta el momento
+        int best_index = 0;
+        for (int i = 0; i < n; ++i) {
+            if (distancias_poblacion_inicial[i] < distancias_poblacion_inicial[best_index]) {
+                best_index = i;
+            }
+        }
+
+        auto end_time = std::chrono::high_resolution_clock::now(); // Marcar el tiempo de finalización
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
+
+        // Si es mejor que el mejor hasta el momento, lo guardo
+        if (best_sol.empty() || distancias_poblacion_inicial[best_index] < best_dist) {
+            best_sol = poblacion_inicial[best_index];
+            best_dist = distancias_poblacion_inicial[best_index];
+            best_time = duration.count();
+
+            if (tunning == false){
+                std::cout << "Solucion: " << best_sol << std::endl;
+                std::cout << "Distancia: " << best_dist << std::endl;
+                std::cout << "Tiempo: " << duration.count() << std::endl;
+            }
+        }
+
+    }
+
+
+    return std::make_tuple(best_dist, best_time);
+}
+
+// Tengo una duda de en que momento deberia iniciar el tiempo de ejecucion con el while para el tiempo
+// Deberia ir creando todo el rato una nueva poblacion aleatoria o deberia ir avanzando con la misma poblacion y sus hijos.
