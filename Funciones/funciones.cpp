@@ -320,6 +320,79 @@ int get_tam_poblacion(int argc, char* argv[]){
 
 }
 
+int get_m (int argc, char* argv[]){
+    int m = 0;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-m") == 0) {
+            m = atoi(argv[i + 1]);
+            if (m < 0) {
+                cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+                exit(1);
+            }
+            return m;
+        }
+    }
+    
+    cout << "Ingrese el tamaño de la población inicial: ";
+    cin >> m;
+    
+    if (m < 0) {
+        cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+        exit(1);
+    }
+    
+    return m;
+}
+
+int get_l (int argc, char* argv[]){
+    int l = 0;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-l") == 0) {
+            l = atoi(argv[i + 1]);
+            if (l < 0) {
+                cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+                exit(1);
+            }
+            return l;
+        }
+    }
+    
+    cout << "Ingrese el tamaño de la población inicial: ";
+    cin >> l;
+    
+    if (l < 0) {
+        cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+        exit(1);
+    }
+    
+    return l;
+}
+
+int get_algoritmo (int argc, char* argv[]){
+    int algoritmo = 0;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-algoritmo") == 0) {
+            algoritmo = atoi(argv[i + 1]);
+            if (algoritmo < 0) {
+                cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+                exit(1);
+            }
+            return algoritmo;
+        }
+    }
+    
+    cout << "Ingrese el tamaño de la población inicial: ";
+    cin >> algoritmo;
+    
+    if (algoritmo < 0) {
+        cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
+        exit(1);
+    }
+    
+    return algoritmo;
+}
+
+
 bool extractValues(string filePath, int& inst, int& m, int& l) {
 
     size_t lastSlash = filePath.find_last_of('/');
@@ -374,7 +447,7 @@ void allInst (int t_limite, float alpha, int tam_poblacion, bool tunning, int m,
         std::string file_name = "../Dataset/inst_" + std::to_string(m) + "_" + std::to_string(l) + "_4_" + std::to_string(k) + ".txt";
         std::vector<std::string> lines = read_file(file_name);   
 
-        if(algoritmo = 0){
+        if(algoritmo == 0){
             std::tuple<int, std::vector<char>> res1 = greedy(lines, alpha, l);
             std::ofstream file("../Test/resultados_greedy_" + std::to_string(m) + "_" + std::to_string(l) + ".txt", std::ios::app);
             save_data(file, k, m, l, std::get<0>(res1), 0);
@@ -383,7 +456,7 @@ void allInst (int t_limite, float alpha, int tam_poblacion, bool tunning, int m,
             costo += std::get<0>(res1);
 
 
-        }else if(algoritmo = 1){
+        }else if(algoritmo == 1){
             std::tuple<int, long long> res2 = grasp(lines, l, t_limite, tunning);
             std::ofstream file("../Test/resultados_grasp_" + std::to_string(m) + "_" + std::to_string(l) + ".txt", std::ios::app);
             save_data(file, k, m, l, std::get<0>(res2), std::get<1>(res2));
@@ -392,7 +465,7 @@ void allInst (int t_limite, float alpha, int tam_poblacion, bool tunning, int m,
             costo += std::get<0>(res2);
             tiempo += std::get<1>(res2);
 
-        }else if(algoritmo = 2){
+        }else if(algoritmo == 2){
             std::tuple<int, long long> res3 = genetico(lines, l, tam_poblacion, alpha, t_limite, tunning);
             std::ofstream file("../Test/resultados_ag_" + std::to_string(m) + "_" + std::to_string(l) + ".txt", std::ios::app);
             save_data(file, k, m, l, std::get<0>(res3), std::get<1>(res3));
@@ -407,9 +480,9 @@ void allInst (int t_limite, float alpha, int tam_poblacion, bool tunning, int m,
     tiempo = tiempo / inst;
 
     cout << "Algoritmo:" << algoritmo << endl;
-    cout << m << l << endl; 
+    cout << m << " " <<l << endl; 
 
-    cout << costo << tiempo << endl;
+    cout << costo << " " <<tiempo << endl;
 }
 
 std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, int tam_poblacion, float alpha, int t_limite, bool tunning) {
