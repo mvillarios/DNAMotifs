@@ -18,14 +18,18 @@ int main(int argc, char* argv[]) {
 
     int t_limite = get_t_limite(argc, argv);
 
+    bool tunning = get_tunning(argc, argv);
+
     int inst, m, l;
 
     extractValues(file_name, inst, m, l);
 
-    std::tuple<int, long long> res = grasp(lines, l, t_limite);
+    std::tuple<int, long long> res = grasp(lines, l, t_limite, tunning);
 
-    cout << std::get<0>(res) << endl; // Valor objetivo
-    cout << std::get<1>(res) << endl; // Tiempo de ejecucion
+    if (tunning == false){
+        cout << std::get<0>(res) << endl; // Valor objetivo
+        cout << std::get<1>(res) << endl; // Tiempo de ejecucion
+    }
 
     return 0;
 }
