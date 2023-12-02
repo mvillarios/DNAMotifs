@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
 
     vector<string> lines = read_file(file_name);
 
-    long long t_limite = get_t_limite(argc, argv);
+    int t_limite = get_t_limite(argc, argv);
 
     bool tunning = get_tunning(argc, argv);
 
@@ -26,11 +26,9 @@ int main(int argc, char* argv[]) {
 
     std::tuple<int, long long> res = grasp(lines, l, t_limite, tunning);
 
-    if(!tunning){
-        cout << "Costo Final: " << std::get<0>(res) << endl;
-        cout << "Tiempo Final: " << std::get<1>(res) / 1e9 << endl;
-    }else{
-        cout << std::get<0>(res) << endl;
+    if (tunning == false){
+        cout << std::get<0>(res) << endl; // Valor objetivo
+        cout << std::get<1>(res) << endl; // Tiempo de ejecucion
     }
 
     return 0;

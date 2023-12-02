@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
 
     float alpha = get_alpha(argc, argv);
 
-    long long t_limite = get_t_limite(argc, argv);
+    int t_limite = get_t_limite(argc, argv);
 
     bool tunning = get_tunning(argc, argv);
 
@@ -32,8 +32,8 @@ int main(int argc, char* argv[]) {
 
     // Imprimo el resultado
     if(tunning == false){
-        cout << "Costo Final: " << std::get<0>(res) << endl;
-        cout << "Tiempo Final: " << std::get<1>(res) / 1e9<< endl;
+        cout << "Resultado Final: " << std::get<0>(res) << endl;
+        cout << "Tiempo Final: " << std::get<1>(res) << endl;
     }else{
         cout << std::get<0>(res) << endl;
     }
