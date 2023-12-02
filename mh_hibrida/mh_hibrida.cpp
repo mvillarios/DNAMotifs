@@ -16,10 +16,6 @@ int main(int argc, char* argv[]) {
 
     vector<string> lines = read_file(file_name);
 
-    int pobl_inicial = get_tam_poblacion(argc, argv);
-
-    float alpha = get_alpha(argc, argv);
-
     long long t_limite = get_t_limite(argc, argv);
 
     bool tunning = get_tunning(argc, argv);
@@ -28,7 +24,7 @@ int main(int argc, char* argv[]) {
 
     extractValues(file_name, inst, m, l);
 
-    std::tuple<int, long long> res = genetico(lines, l, pobl_inicial, alpha, t_limite, tunning);
+    std::tuple<int, long long> res = mh_hibrida(lines, l, t_limite, tunning, 20, 0.5, 0.1 );
 
     // Imprimo el resultado
     if(tunning == false){
