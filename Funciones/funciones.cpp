@@ -390,7 +390,7 @@ float get_alpha(int argc, char* argv[]) {
             alpha = atof(argv[i + 1]);
             if (alpha < 0 || alpha > 1) {
                 cerr << "Error: El valor de alpha debe estar entre 0 y 1." << endl;
-                exit(1);
+                break;
             }
             return alpha;
         }
@@ -415,7 +415,7 @@ long long get_t_limite(int argc, char* argv[]) {
             t_limite = stoi(argv[i + 1]) * 1e9;
             if (t_limite < 0) {
                 cerr << "Error: El tiempo límite debe ser mayor a 0." << endl;
-                exit(1);
+                break;
             }
             return t_limite;
         }
@@ -442,31 +442,6 @@ bool get_tunning(int argc, char* argv[]){
     return tunning;
 }
 
-int get_tam_poblacion(int argc, char* argv[]){
-    int pobl_inicial = 0;
-    for (int i = 1; i < argc - 1; i += 2) {
-        if (strcmp(argv[i], "-p") == 0) {
-            pobl_inicial = atoi(argv[i + 1]);
-            if (pobl_inicial < 0) {
-                cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
-                exit(1);
-            }
-            return pobl_inicial;
-        }
-    }
-    
-    cout << "Ingrese el tamaño de la población inicial: ";
-    cin >> pobl_inicial;
-    
-    if (pobl_inicial < 0) {
-        cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
-        exit(1);
-    }
-    
-    return pobl_inicial;
-
-}
-
 int get_m (int argc, char* argv[]){
     int m = 0;
     for (int i = 1; i < argc - 1; i += 2) {
@@ -474,7 +449,7 @@ int get_m (int argc, char* argv[]){
             m = atoi(argv[i + 1]);
             if (m < 0) {
                 cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
-                exit(1);
+                break;
             }
             return m;
         }
@@ -498,7 +473,7 @@ int get_l (int argc, char* argv[]){
             l = atoi(argv[i + 1]);
             if (l < 0) {
                 cerr << "Error: El tamaño de la población inicial debe ser mayor a 0." << endl;
-                exit(1);
+                break;
             }
             return l;
         }
@@ -520,9 +495,9 @@ int get_algoritmo (int argc, char* argv[]){
     for (int i = 1; i < argc - 1; i += 2) {
         if (strcmp(argv[i], "-algoritmo") == 0) {
             algoritmo = atoi(argv[i + 1]);
-            if (algoritmo < 0 && algoritmo > 2) {
-                cerr << "Error: El algoritmo debe ser entre 0 y 2" << endl;
-                exit(1);
+            if (algoritmo < 0 && algoritmo > 3) {
+                cerr << "Error: El algoritmo debe ser entre 0 y 3" << endl;
+                break;
             }
             return algoritmo;
         }
@@ -531,12 +506,133 @@ int get_algoritmo (int argc, char* argv[]){
     cout << "Ingrese el algoritmo: ";
     cin >> algoritmo;
     
-    if (algoritmo < 0 && algoritmo > 2) {
-        cerr << "Error: El algoritmo debe ser entre 0 y 2" << endl;
+    if (algoritmo < 0 && algoritmo > 3) {
+        cerr << "Error: El algoritmo debe ser entre 0 y 3" << endl;
         exit(1);
     }
     
     return algoritmo;
+}
+
+int get_tam_poblacion(int argc, char* argv[]){
+    int pobl_inicial = 0;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-p") == 0) {
+            pobl_inicial = atoi(argv[i + 1]);
+            if (pobl_inicial < 20) {
+                cerr << "Error: El tamaño de la población inicial debe ser mayor o igual a 20." << endl;
+                break;
+            }
+            return pobl_inicial;
+        }
+    }
+    
+    cout << "Ingrese el tamaño de la población inicial: ";
+    cin >> pobl_inicial;
+    
+    if (pobl_inicial < 20) {
+        cerr << "Error: El tamaño de la población inicial debe ser mayor o igual a 20." << endl;
+        exit(1);
+    }
+    
+    return pobl_inicial;
+
+}
+
+float get_porcentaje_seleccionados(int argc, char* argv[]){
+    float porcentaje_seleccionados = 0;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-ps") == 0) {
+            porcentaje_seleccionados = atof(argv[i + 1]);
+            if (porcentaje_seleccionados < 0.1 || porcentaje_seleccionados > 0.5) {
+                cerr << "Error: El porcentaje de seleccionados debe estar entre 0.1 y 0.5." << endl;
+                break;
+            }
+            return porcentaje_seleccionados;
+        }
+    }
+    
+    cout << "Ingrese el porcentaje de seleccionados: ";
+    cin >> porcentaje_seleccionados;
+    
+    if (porcentaje_seleccionados < 0.1 || porcentaje_seleccionados > 0.5) {
+        cerr << "Error: El porcentaje de seleccionados debe estar entre 0.1 y 0.5." << endl;
+        exit(1);
+    }
+    
+    return porcentaje_seleccionados;
+}
+
+float get_prob_mutacion(int argc, char* argv[]){
+    float prob_mutacion = 0;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-pm") == 0) {
+            prob_mutacion = atof(argv[i + 1]);
+            if (prob_mutacion < 0.01 || prob_mutacion > 0.3) {
+                cerr << "Error: La probabilidad de mutación debe estar entre 0.01 y 0.3." << endl;
+                break;
+            }
+            return prob_mutacion;
+        }
+    }
+    
+    cout << "Ingrese la probabilidad de mutación: ";
+    cin >> prob_mutacion;
+    
+    if (prob_mutacion < 0.01 || prob_mutacion > 0.1) {
+        cerr << "Error: La probabilidad de mutación debe estar entre 0.01 y 0.3." << endl;
+        exit(1);
+    }
+    
+    return prob_mutacion;
+}
+
+float get_prob_cruce(int argc, char* argv[]){
+    float prob_cruce = 0;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-pc") == 0) {
+            prob_cruce = atof(argv[i + 1]);
+            if (prob_cruce < 0.5 || prob_cruce > 0.9) {
+                cerr << "Error: La probabilidad de cruce debe estar entre 0.5 y 0.9." << endl;
+                break;
+            }
+            return prob_cruce;
+        }
+    }
+    
+    cout << "Ingrese la probabilidad de cruce: ";
+    cin >> prob_cruce;
+    
+    if (prob_cruce < 0.5 || prob_cruce > 0.9) {
+        cerr << "Error: La probabilidad de cruce debe estar entre 0.5 y 0.9." << endl;
+        exit(1);
+    }
+    
+    return prob_cruce;
+}
+
+float get_prob_local_search(int argc, char* argv[]){
+    float prob_local_search = 0;
+    for (int i = 1; i < argc - 1; i += 2) {
+        if (strcmp(argv[i], "-pls") == 0) {
+            prob_local_search = atof(argv[i + 1]);
+            if (prob_local_search < 0.5 || prob_local_search > 0.9) {
+                cerr << "Error: La probabilidad de búsqueda local debe estar entre 0.5 y 0.9." << endl;
+                break;
+            }
+            return prob_local_search;
+        }
+    }
+    
+    cout << "Ingrese la probabilidad de búsqueda local: ";
+    cin >> prob_local_search;
+    
+    if (prob_local_search < 0.5 || prob_local_search > 0.9) {
+        cerr << "Error: La probabilidad de búsqueda local debe estar entre 0.5 y 0.9." << endl;
+        exit(1);
+    }
+    
+    return prob_local_search;
 }
 
 bool extractValues(string filePath, int& inst, int& m, int& l) {
@@ -633,9 +729,13 @@ void allInst (long long t_limite, float alpha, int tam_poblacion, bool tunning, 
 // Implementacion de metaheuristica hibrida de algoritmo genetico con busqueda local
 // Recibe un vector de strings con las secuencias de ADN
 // Retorna un par con el valor objetivo y el tiempo de ejecución
+// tam_pobl_inicial: Tamaño de la población inicial ( >= 20)
 // porcentaje_seleccionados: Porcentaje de individuos seleccionados por torneo (entre 0.1 y 0.5)
-// tam_poblacion_inicial: Tamaño de la población inicial ( >= 20)
-std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string, long long t_limite, int tunning, int tam_poblacion_inicial, float porcentaje_seleccionados, float prob_mutacion){
+// prob_mutacion: Probabilidad de mutación (entre 0.01 y 0.3)
+// prob_cruce: Probabilidad de cruce (entre 0.5 y 0.9)
+// prob_local_search: Probabilidad de aplicar búsqueda local (entre 0.5 y 0.9)
+std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string, long long t_limite, int tunning, int tam_pobl_inicial, 
+                                    float porcentaje_seleccionados, float prob_mutacion, float prob_cruce, float prob_local_search){
 
     int m = tam_string;
     int tam_s = s.size();
@@ -648,17 +748,11 @@ std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string
     auto now = std::chrono::system_clock::now();
     auto duration = now - start_time;
 
-    cout << "Tamaño de la población inicial: " << tam_poblacion_inicial << endl;
-    cout << "Porcentaje de individuos seleccionados por torneo: " << porcentaje_seleccionados << endl;
-    cout << "Probabilidad de mutación: " << prob_mutacion << endl;
-    cout << "Tiempo límite: " << t_limite / 1e9 << endl;
-    cout << "Duracion: " << duration.count() << endl;
-
     // Genera una población inicial aleatoria
     std::vector<std::string> poblacion_inicial;
     std::vector<int> distancias_poblacion_inicial;
 
-    int n = tam_poblacion_inicial;
+    int n = tam_pobl_inicial;
     for (int i = 0; i < n; ++i) {
         std::string cromosoma;
         for (int j = 0; j < m; ++j) {
@@ -668,11 +762,8 @@ std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string
         distancias_poblacion_inicial.push_back(calcularDistancia(cromosoma, s));
     }
 
-    cout << "Inicio While" << endl;
     while(duration.count() <= t_limite){
-        cout << "Inicio Genetico" << endl;
 
-        cout << "Inicio Torneo" << endl;
         // --------------- Torneo ----------------- //
         // Selecciona individuos de la población por torneo
         std::vector<int> seleccionados; // Vector que guarda los indices de los individuos seleccionados
@@ -698,51 +789,38 @@ std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string
                 }
             }
 
-            cout << "Mejor individuo: " << mejor_individuo << endl;
-
             seleccionados.push_back(mejor_individuo);
         }
 
-        cout << "Fin Torneo" << endl;
-
-        cout << "Inicio Cruza" << endl;
         // --------------- Cruza ----------------- //
         // Cruza los individuos seleccionados
+        // Si el número de individuos seleccionados es impar, se copia el último individuo
         std::vector<std::string> hijos;
 
         for (int i = 0; i < n - 1; i += 2) {
-
             std::string padre1 = poblacion_inicial[seleccionados[i]];
             std::string padre2 = poblacion_inicial[seleccionados[i + 1]];
 
-            std::string hijo1 = "";
-            std::string hijo2 = "";
+            // Probabilidad de cruce
+            if ((float)rand() / RAND_MAX < prob_cruce) {
+                int punto_cruza = rand() % m;
 
-            for (int j = 0; j < m; ++j) {
-                if (rand() % 2 == 0) {
-                    hijo1 += padre1[j];
-                    hijo2 += padre2[j];
-                } else {
-                    hijo1 += padre2[j];
-                    hijo2 += padre1[j];
-                }
+                std::string hijo1 = padre1.substr(0, punto_cruza) + padre2.substr(punto_cruza);
+                std::string hijo2 = padre2.substr(0, punto_cruza) + padre1.substr(punto_cruza);
+
+                hijos.push_back(hijo1);
+                hijos.push_back(hijo2);
+            } else {
+                // Sin cruce, simplemente copiar a los padres como hijos
+                hijos.push_back(padre1);
+                hijos.push_back(padre2);
             }
-
-            cout << "Hijo 1: " << hijo1 << endl;
-            cout << "Hijo 2: " << hijo2 << endl;
-
-            hijos.push_back(hijo1);
-            hijos.push_back(hijo2);
         }
 
         if (tam_torneo % 2 != 0) {
             hijos.push_back(poblacion_inicial[seleccionados[tam_torneo - 1]]);
         }
 
-
-        cout << "Fin Cruza" << endl;
-
-        cout << "Inicio Mutacion" << endl;
         // --------------- Mutación ----------------- //
         // Mutación
         for (size_t i = 0; i < hijos.size(); ++i) {
@@ -756,20 +834,21 @@ std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string
             }
         }
 
-        cout << "Fin Mutacion" << endl;
-
-
-        cout << "Inicio Local Search" << endl;
         // --------------- localSearch ----------------- //
         for (size_t i = 0; i < hijos.size(); ++i) {
-            if (rand() % 2 == 0) { // Aplicar búsqueda local con probabilidad 0.5
+            // Aplicar búsqueda local 
+            if ((float)rand() / RAND_MAX <= prob_local_search) {
                 hijos[i] = localSearch(hijos[i], s);
             }
+            now = std::chrono::system_clock::now();
+            duration = now - start_time;
+            if (duration.count() >= t_limite) break;
         }
 
-        cout << "Fin Local Search" << endl;
+        now = std::chrono::system_clock::now();
+        duration = now - start_time;
+        if (duration.count() >= t_limite) break;
 
-        cout << "Inicio Reemplazo" << endl;
 
         // --------------- Reemplazo ----------------- //
         // Reemplazo los hijos en la población inicial
@@ -798,15 +877,9 @@ std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string
             distancias_poblacion_inicial[indice_reemplazar] = distancias_hijos[i];
         }
 
-        cout << "Fin Reemplazo" << endl;
-
         // Busco el mejor hasta el momento
-        int best_index = 0;
-        for (int i = 0; i < n; ++i) {
-            if (distancias_poblacion_inicial[i] < distancias_poblacion_inicial[best_index]) {
-                best_index = i;
-            }
-        }
+        auto best_iter = std::min_element(distancias_poblacion_inicial.begin(), distancias_poblacion_inicial.end());
+        int best_index = std::distance(distancias_poblacion_inicial.begin(), best_iter);
 
         now = std::chrono::system_clock::now();
         duration = now - start_time;
@@ -833,25 +906,24 @@ std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string
 }
 
 std::string localSearch(const std::string& sol_inicial, const std::vector<std::string>& s) {
-    cout << "Entro local search" << endl;
     
     std::string sol_actual = sol_inicial;
     int dist_actual = calcularDistancia(sol_actual, s);
+    bool mejora = false;
 
-    for (size_t j = 0; j < sol_actual.size(); j++) {
-        for (char c : {'A', 'T', 'C', 'G'}) {
-            if (sol_actual[j] == c) continue;
+    for (size_t i = 0; i < sol_actual.size(); i++) {
+        for (size_t j = i + 1; j < sol_actual.size(); j++) {
             std::string nueva_solucion = sol_actual;
-            nueva_solucion[j] = c;
+            std::swap(nueva_solucion[i], nueva_solucion[j]);
             int nueva_dist = calcularDistancia(nueva_solucion, s);
             if (nueva_dist < dist_actual) {
                 dist_actual = nueva_dist;
                 sol_actual = nueva_solucion;
+                mejora = true;
             }
         }
+        if (mejora) break;
     }
-
-    cout << "Salio local search" << endl;
 
     return sol_actual;
 }
