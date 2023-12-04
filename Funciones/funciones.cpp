@@ -731,7 +731,7 @@ void allInst (long long t_limite, float alpha, int tam_poblacion, bool tunning, 
 // Retorna un par con el valor objetivo y el tiempo de ejecución
 // tam_pobl_inicial: Tamaño de la población inicial ( >= 20)
 // porcentaje_seleccionados: Porcentaje de individuos seleccionados por torneo (entre 0.1 y 0.5)
-// prob_mutacion: Probabilidad de mutación (entre 0.01 y 0.3)
+// prob_mutacion: Probabilidad de mutación (entre 0.1 y 0.3)
 // prob_cruce: Probabilidad de cruce (entre 0.5 y 0.9)
 // prob_local_search: Probabilidad de aplicar búsqueda local (entre 0.5 y 0.9)
 std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string, long long t_limite, int tunning, int tam_pobl_inicial, 
@@ -767,39 +767,36 @@ std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string
         // --------------- Torneo ----------------- //
         // Selecciona individuos de la población por torneo
         std::vector<int> seleccionados; // Vector que guarda los indices de los individuos seleccionados
-        int tam_torneo = n * porcentaje_seleccionados; // Numero de individuos seleccionados
+        int tam_seleccionados = n * porcentaje_seleccionados; // Numero de individuos seleccionados
 
-        for (int i = 0; i < n; ++i) {
-            // Seleccionar individuos aleatorios únicos para el torneo
-            std::vector<int> participantes;
-            for (int j = 0; j < tam_torneo; ++j) {
-                int indice_aleatorio;
-                do {
-                    indice_aleatorio = rand() % n;
-                } while (std::find(participantes.begin(), participantes.end(), indice_aleatorio) != participantes.end());
+        // Seleccionar individuos aleatorios únicos para el torneo
+        std::vector<int> participantes(n);
+        std::iota(participantes.begin(), participantes.end(), 0);
 
-                participantes.push_back(indice_aleatorio);
-            }
+        std::random_shuffle(participantes.begin(), participantes.end());
 
-            // Encontrar al individuo con la mejor aptitud en el torneo
-            int mejor_individuo = participantes[0];
-            for (int participante : participantes) {
-                if (distancias_poblacion_inicial[participante] < distancias_poblacion_inicial[mejor_individuo]) {
-                    mejor_individuo = participante;
-                }
-            }
+        // Recorro los participantes y a cada ganador lo agrego a seleccionados
+        for (int i = 0; seleccionados.size() < tam_seleccionados; i += 2) {
+            int index1 = participantes[i];
+            int index2 = participantes[i + 1];
 
-            seleccionados.push_back(mejor_individuo);
+            int seleccionado = (distancias_poblacion_inicial[index1] < distancias_poblacion_inicial[index2]) ? index1 : index2;
+
+            seleccionados.push_back(seleccionado);
         }
 
         // --------------- Cruza ----------------- //
         // Cruza los individuos seleccionados
-        // Si el número de individuos seleccionados es impar, se copia el último individuo
+        // A través de un punto de cruce al azar
         std::vector<std::string> hijos;
 
-        for (int i = 0; i < n - 1; i += 2) {
+        for (int i = 0; i < tam_seleccionados - 1; i += 2) {
+
+            if (i + 1 >= seleccionados.size()) break;
+
             std::string padre1 = poblacion_inicial[seleccionados[i]];
             std::string padre2 = poblacion_inicial[seleccionados[i + 1]];
+
 
             // Probabilidad de cruce
             if ((float)rand() / RAND_MAX < prob_cruce) {
@@ -817,8 +814,9 @@ std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string
             }
         }
 
-        if (tam_torneo % 2 != 0) {
-            hijos.push_back(poblacion_inicial[seleccionados[tam_torneo - 1]]);
+        // Si quedó un individuo sin cruzar (cuando num_seleccionados es impar)
+        if (tam_seleccionados % 2 != 0) {
+            hijos.push_back(poblacion_inicial[seleccionados[tam_seleccionados - 1]]);
         }
 
         // --------------- Mutación ----------------- //
@@ -849,18 +847,15 @@ std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string
         duration = now - start_time;
         if (duration.count() >= t_limite) break;
 
-
         // --------------- Reemplazo ----------------- //
         // Reemplazo los hijos en la población inicial
         // Elimino los individuos con mayor distancia
         // Y lo reemplazo por los hijos
-
         // Calcular distancias de los hijos
         std::vector<int> distancias_hijos;
         for (const auto& hijo : hijos) {
             distancias_hijos.push_back(calcularDistancia(hijo, s));
         }
-
         // Crear un vector de índices [0, 1, 2, ..., n-1]
         std::vector<int> indices_originales(n);
         std::iota(indices_originales.begin(), indices_originales.end(), 0);
@@ -873,6 +868,7 @@ std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string
         // Reemplazar los individuos con mayor distancia por los hijos
         for (int i = 0; i < hijos.size(); ++i) {
             int indice_reemplazar = indices_originales[i];
+            //cout << "Indice reemplazar: " << indice_reemplazar << endl;
             poblacion_inicial[indice_reemplazar] = hijos[i];
             distancias_poblacion_inicial[indice_reemplazar] = distancias_hijos[i];
         }
