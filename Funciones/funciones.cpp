@@ -298,6 +298,205 @@ std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, 
     return std::make_tuple(best_dist, best_time);
 }
 
+// Implementacion de metaheuristica hibrida de algoritmo genetico con busqueda local
+// Recibe un vector de strings con las secuencias de ADN
+// Retorna un par con el valor objetivo y el tiempo de ejecución
+// tam_pobl_inicial: Tamaño de la población inicial ( >= 20)
+// porcentaje_seleccionados: Porcentaje de individuos seleccionados por torneo (entre 0.1 y 0.5)
+// prob_mutacion: Probabilidad de mutación (entre 0.1 y 0.3)
+// prob_cruce: Probabilidad de cruce (entre 0.5 y 0.9)
+// prob_local_search: Probabilidad de aplicar búsqueda local (entre 0.5 y 0.9)
+std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string, long long t_limite, int tunning, int tam_pobl_inicial, 
+                                    float porcentaje_seleccionados, float prob_mutacion, float prob_cruce, float prob_local_search){
+
+    int m = tam_string;
+    int tam_s = s.size();
+    
+    int best_dist = -1;
+    long long best_time = -1;
+    std::string best_sol = "";
+
+    auto start_time = std::chrono::system_clock::now(); // Marcar el tiempo de inicio
+    auto now = std::chrono::system_clock::now();
+    auto duration = now - start_time;
+
+    // Genera una población inicial aleatoria
+    std::vector<std::string> poblacion_inicial;
+    std::vector<int> distancias_poblacion_inicial;
+
+    int n = tam_pobl_inicial;
+    for (int i = 0; i < n; ++i) {
+        std::string cromosoma;
+        for (int j = 0; j < m; ++j) {
+            cromosoma += "ACGT"[rand() % 4];
+        }
+        poblacion_inicial.push_back(cromosoma);
+        distancias_poblacion_inicial.push_back(calcularDistancia(cromosoma, s));
+    }
+
+    while(duration.count() <= t_limite){
+
+        // --------------- Torneo ----------------- //
+        // Selecciona individuos de la población por torneo
+        std::vector<int> seleccionados; // Vector que guarda los indices de los individuos seleccionados
+        int tam_seleccionados = n * porcentaje_seleccionados; // Numero de individuos seleccionados
+
+        // Seleccionar individuos aleatorios únicos para el torneo
+        std::vector<int> participantes(n);
+        std::iota(participantes.begin(), participantes.end(), 0);
+
+        std::random_shuffle(participantes.begin(), participantes.end());
+
+        // Recorro los participantes y a cada ganador lo agrego a seleccionados
+        for (int i = 0; seleccionados.size() < tam_seleccionados; i += 2) {
+            int index1 = participantes[i];
+            int index2 = participantes[i + 1];
+
+            int seleccionado = (distancias_poblacion_inicial[index1] < distancias_poblacion_inicial[index2]) ? index1 : index2;
+
+            seleccionados.push_back(seleccionado);
+        }
+
+        // --------------- Cruza ----------------- //
+        // Cruza los individuos seleccionados
+        // A través de un punto de cruce al azar
+        std::vector<std::string> hijos;
+
+        for (int i = 0; i < tam_seleccionados - 1; i += 2) {
+
+            if (i + 1 >= seleccionados.size()) break;
+
+            std::string padre1 = poblacion_inicial[seleccionados[i]];
+            std::string padre2 = poblacion_inicial[seleccionados[i + 1]];
+
+
+            // Probabilidad de cruce
+            if ((float)rand() / RAND_MAX < prob_cruce) {
+                int punto_cruza = rand() % m;
+
+                std::string hijo1 = padre1.substr(0, punto_cruza) + padre2.substr(punto_cruza);
+                std::string hijo2 = padre2.substr(0, punto_cruza) + padre1.substr(punto_cruza);
+
+                hijos.push_back(hijo1);
+                hijos.push_back(hijo2);
+            } else {
+                // Sin cruce, simplemente copiar a los padres como hijos
+                hijos.push_back(padre1);
+                hijos.push_back(padre2);
+            }
+        }
+
+        // Si quedó un individuo sin cruzar (cuando num_seleccionados es impar)
+        if (tam_seleccionados % 2 != 0) {
+            hijos.push_back(poblacion_inicial[seleccionados[tam_seleccionados - 1]]);
+        }
+
+        // --------------- Mutación ----------------- //
+        // Mutación
+        for (size_t i = 0; i < hijos.size(); ++i) {
+            // Probabilidad de mutación
+            // Si se cumple la probabilidad alpha, se muta
+            if ((float)rand() / RAND_MAX < prob_mutacion) {
+                // Selecciona un índice al azar
+                int index = rand() % m;
+                int index2 = rand() % 4;
+                hijos[i][index] = "ACGT"[index2];
+            }
+        }
+
+        // --------------- localSearch ----------------- //
+        for (size_t i = 0; i < hijos.size(); ++i) {
+            // Aplicar búsqueda local 
+            if ((float)rand() / RAND_MAX <= prob_local_search) {
+                hijos[i] = localSearch(hijos[i], s);
+            }
+            now = std::chrono::system_clock::now();
+            duration = now - start_time;
+            if (duration.count() >= t_limite) break;
+        }
+
+        now = std::chrono::system_clock::now();
+        duration = now - start_time;
+        if (duration.count() >= t_limite) break;
+
+        // --------------- Reemplazo ----------------- //
+        // Reemplazo los hijos en la población inicial
+        // Elimino los individuos con mayor distancia
+        // Y lo reemplazo por los hijos
+        // Calcular distancias de los hijos
+        std::vector<int> distancias_hijos;
+        for (const auto& hijo : hijos) {
+            distancias_hijos.push_back(calcularDistancia(hijo, s));
+        }
+        // Crear un vector de índices [0, 1, 2, ..., n-1]
+        std::vector<int> indices_originales(n);
+        std::iota(indices_originales.begin(), indices_originales.end(), 0);
+
+        // Ordenar los índices según las distancias de la población original
+        std::sort(indices_originales.begin(), indices_originales.end(), [&](int i, int j) {
+            return distancias_poblacion_inicial[i] > distancias_poblacion_inicial[j];
+        });
+
+        // Reemplazar los individuos con mayor distancia por los hijos
+        for (int i = 0; i < hijos.size(); ++i) {
+            int indice_reemplazar = indices_originales[i];
+            //cout << "Indice reemplazar: " << indice_reemplazar << endl;
+            poblacion_inicial[indice_reemplazar] = hijos[i];
+            distancias_poblacion_inicial[indice_reemplazar] = distancias_hijos[i];
+        }
+
+        // Busco el mejor hasta el momento
+        auto best_iter = std::min_element(distancias_poblacion_inicial.begin(), distancias_poblacion_inicial.end());
+        int best_index = std::distance(distancias_poblacion_inicial.begin(), best_iter);
+
+        now = std::chrono::system_clock::now();
+        duration = now - start_time;
+        if (duration.count() >= t_limite) break;
+
+        // Si es mejor que el mejor hasta el momento, lo guardo
+        if (best_sol.empty() || distancias_poblacion_inicial[best_index] < best_dist) {
+            best_sol = poblacion_inicial[best_index];
+            best_dist = distancias_poblacion_inicial[best_index];
+            best_time = duration.count();
+
+            if (!tunning){
+                //std::cout << "Solucion: " << best_sol << std::endl;
+                std::cout << "Costo: " << best_dist << std::endl;
+                std::cout << "Tiempo: " << best_time / 1e9 << std::endl;
+            }
+        }
+
+        now = std::chrono::system_clock::now();
+        duration = now - start_time;
+    }
+
+    return std::make_tuple(best_dist, best_time);
+}
+
+std::string localSearch(const std::string& sol_inicial, const std::vector<std::string>& s) {
+    
+    std::string sol_actual = sol_inicial;
+    int dist_actual = calcularDistancia(sol_actual, s);
+    bool mejora = false;
+
+    for (size_t i = 0; i < sol_actual.size(); i++) {
+        for (size_t j = i + 1; j < sol_actual.size(); j++) {
+            std::string nueva_solucion = sol_actual;
+            std::swap(nueva_solucion[i], nueva_solucion[j]);
+            int nueva_dist = calcularDistancia(nueva_solucion, s);
+            if (nueva_dist < dist_actual) {
+                dist_actual = nueva_dist;
+                sol_actual = nueva_solucion;
+                mejora = true;
+                break;
+            }
+        }
+        if (mejora) break;
+    }
+
+    return sol_actual;
+}
+
 // Función que retorna el índice del menor valor de un vector
 // Si hay varios elementos con el mismo valor mínimo, elige uno al azar
 // Si alpha > 0, retorna un índice al azar con probabilidad alpha
@@ -714,212 +913,20 @@ void allInst (long long t_limite, float alpha, int tam_poblacion, bool tunning, 
 
             costo += std::get<0>(res3);
             tiempo += std::get<1>(res3);
+
+        }else if(algoritmo == 3){
+            std::tuple<int, long long> res4 = mh_hibrida(lines, l, t_limite, tunning, 640, 0.4083, 0.2141, 0.7732, 0.8233);
+            std::ofstream file("../Testing/resultados_hibrida_" + std::to_string(m) + "_" + std::to_string(l) + ".txt", std::ios::app);
+            save_data(file, k, m, l, std::get<0>(res4), std::get<1>(res4)/ 1e9);
+            close_data(file);
         }
     }
 
-    costo = costo / inst;
-    tiempo = tiempo / inst;
+    //costo = costo / inst;
+    //tiempo = tiempo / inst;
 
-    cout << "Algoritmo:" << algoritmo << endl;
-    cout << m << " " <<l << endl; 
+    //cout << "Algoritmo:" << algoritmo << endl;
+    //cout << m << " " <<l << endl; 
 
-    cout << costo << " " <<tiempo << endl;
-}
-
-// Implementacion de metaheuristica hibrida de algoritmo genetico con busqueda local
-// Recibe un vector de strings con las secuencias de ADN
-// Retorna un par con el valor objetivo y el tiempo de ejecución
-// tam_pobl_inicial: Tamaño de la población inicial ( >= 20)
-// porcentaje_seleccionados: Porcentaje de individuos seleccionados por torneo (entre 0.1 y 0.5)
-// prob_mutacion: Probabilidad de mutación (entre 0.1 y 0.3)
-// prob_cruce: Probabilidad de cruce (entre 0.5 y 0.9)
-// prob_local_search: Probabilidad de aplicar búsqueda local (entre 0.5 y 0.9)
-std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string, long long t_limite, int tunning, int tam_pobl_inicial, 
-                                    float porcentaje_seleccionados, float prob_mutacion, float prob_cruce, float prob_local_search){
-
-    int m = tam_string;
-    int tam_s = s.size();
-    
-    int best_dist = -1;
-    long long best_time = -1;
-    std::string best_sol = "";
-
-    auto start_time = std::chrono::system_clock::now(); // Marcar el tiempo de inicio
-    auto now = std::chrono::system_clock::now();
-    auto duration = now - start_time;
-
-    // Genera una población inicial aleatoria
-    std::vector<std::string> poblacion_inicial;
-    std::vector<int> distancias_poblacion_inicial;
-
-    int n = tam_pobl_inicial;
-    for (int i = 0; i < n; ++i) {
-        std::string cromosoma;
-        for (int j = 0; j < m; ++j) {
-            cromosoma += "ACGT"[rand() % 4];
-        }
-        poblacion_inicial.push_back(cromosoma);
-        distancias_poblacion_inicial.push_back(calcularDistancia(cromosoma, s));
-    }
-
-    while(duration.count() <= t_limite){
-
-        // --------------- Torneo ----------------- //
-        // Selecciona individuos de la población por torneo
-        std::vector<int> seleccionados; // Vector que guarda los indices de los individuos seleccionados
-        int tam_seleccionados = n * porcentaje_seleccionados; // Numero de individuos seleccionados
-
-        // Seleccionar individuos aleatorios únicos para el torneo
-        std::vector<int> participantes(n);
-        std::iota(participantes.begin(), participantes.end(), 0);
-
-        std::random_shuffle(participantes.begin(), participantes.end());
-
-        // Recorro los participantes y a cada ganador lo agrego a seleccionados
-        for (int i = 0; seleccionados.size() < tam_seleccionados; i += 2) {
-            int index1 = participantes[i];
-            int index2 = participantes[i + 1];
-
-            int seleccionado = (distancias_poblacion_inicial[index1] < distancias_poblacion_inicial[index2]) ? index1 : index2;
-
-            seleccionados.push_back(seleccionado);
-        }
-
-        // --------------- Cruza ----------------- //
-        // Cruza los individuos seleccionados
-        // A través de un punto de cruce al azar
-        std::vector<std::string> hijos;
-
-        for (int i = 0; i < tam_seleccionados - 1; i += 2) {
-
-            if (i + 1 >= seleccionados.size()) break;
-
-            std::string padre1 = poblacion_inicial[seleccionados[i]];
-            std::string padre2 = poblacion_inicial[seleccionados[i + 1]];
-
-
-            // Probabilidad de cruce
-            if ((float)rand() / RAND_MAX < prob_cruce) {
-                int punto_cruza = rand() % m;
-
-                std::string hijo1 = padre1.substr(0, punto_cruza) + padre2.substr(punto_cruza);
-                std::string hijo2 = padre2.substr(0, punto_cruza) + padre1.substr(punto_cruza);
-
-                hijos.push_back(hijo1);
-                hijos.push_back(hijo2);
-            } else {
-                // Sin cruce, simplemente copiar a los padres como hijos
-                hijos.push_back(padre1);
-                hijos.push_back(padre2);
-            }
-        }
-
-        // Si quedó un individuo sin cruzar (cuando num_seleccionados es impar)
-        if (tam_seleccionados % 2 != 0) {
-            hijos.push_back(poblacion_inicial[seleccionados[tam_seleccionados - 1]]);
-        }
-
-        // --------------- Mutación ----------------- //
-        // Mutación
-        for (size_t i = 0; i < hijos.size(); ++i) {
-            // Probabilidad de mutación
-            // Si se cumple la probabilidad alpha, se muta
-            if ((float)rand() / RAND_MAX < prob_mutacion) {
-                // Selecciona un índice al azar
-                int index = rand() % m;
-                int index2 = rand() % 4;
-                hijos[i][index] = "ACGT"[index2];
-            }
-        }
-
-        // --------------- localSearch ----------------- //
-        for (size_t i = 0; i < hijos.size(); ++i) {
-            // Aplicar búsqueda local 
-            if ((float)rand() / RAND_MAX <= prob_local_search) {
-                hijos[i] = localSearch(hijos[i], s);
-            }
-            now = std::chrono::system_clock::now();
-            duration = now - start_time;
-            if (duration.count() >= t_limite) break;
-        }
-
-        now = std::chrono::system_clock::now();
-        duration = now - start_time;
-        if (duration.count() >= t_limite) break;
-
-        // --------------- Reemplazo ----------------- //
-        // Reemplazo los hijos en la población inicial
-        // Elimino los individuos con mayor distancia
-        // Y lo reemplazo por los hijos
-        // Calcular distancias de los hijos
-        std::vector<int> distancias_hijos;
-        for (const auto& hijo : hijos) {
-            distancias_hijos.push_back(calcularDistancia(hijo, s));
-        }
-        // Crear un vector de índices [0, 1, 2, ..., n-1]
-        std::vector<int> indices_originales(n);
-        std::iota(indices_originales.begin(), indices_originales.end(), 0);
-
-        // Ordenar los índices según las distancias de la población original
-        std::sort(indices_originales.begin(), indices_originales.end(), [&](int i, int j) {
-            return distancias_poblacion_inicial[i] > distancias_poblacion_inicial[j];
-        });
-
-        // Reemplazar los individuos con mayor distancia por los hijos
-        for (int i = 0; i < hijos.size(); ++i) {
-            int indice_reemplazar = indices_originales[i];
-            //cout << "Indice reemplazar: " << indice_reemplazar << endl;
-            poblacion_inicial[indice_reemplazar] = hijos[i];
-            distancias_poblacion_inicial[indice_reemplazar] = distancias_hijos[i];
-        }
-
-        // Busco el mejor hasta el momento
-        auto best_iter = std::min_element(distancias_poblacion_inicial.begin(), distancias_poblacion_inicial.end());
-        int best_index = std::distance(distancias_poblacion_inicial.begin(), best_iter);
-
-        now = std::chrono::system_clock::now();
-        duration = now - start_time;
-        if (duration.count() >= t_limite) break;
-
-        // Si es mejor que el mejor hasta el momento, lo guardo
-        if (best_sol.empty() || distancias_poblacion_inicial[best_index] < best_dist) {
-            best_sol = poblacion_inicial[best_index];
-            best_dist = distancias_poblacion_inicial[best_index];
-            best_time = duration.count();
-
-            if (!tunning){
-                //std::cout << "Solucion: " << best_sol << std::endl;
-                std::cout << "Costo: " << best_dist << std::endl;
-                std::cout << "Tiempo: " << best_time / 1e9 << std::endl;
-            }
-        }
-
-        now = std::chrono::system_clock::now();
-        duration = now - start_time;
-    }
-
-    return std::make_tuple(best_dist, best_time);
-}
-
-std::string localSearch(const std::string& sol_inicial, const std::vector<std::string>& s) {
-    
-    std::string sol_actual = sol_inicial;
-    int dist_actual = calcularDistancia(sol_actual, s);
-    bool mejora = false;
-
-    for (size_t i = 0; i < sol_actual.size(); i++) {
-        for (size_t j = i + 1; j < sol_actual.size(); j++) {
-            std::string nueva_solucion = sol_actual;
-            std::swap(nueva_solucion[i], nueva_solucion[j]);
-            int nueva_dist = calcularDistancia(nueva_solucion, s);
-            if (nueva_dist < dist_actual) {
-                dist_actual = nueva_dist;
-                sol_actual = nueva_solucion;
-                mejora = true;
-            }
-        }
-        if (mejora) break;
-    }
-
-    return sol_actual;
+    //cout << costo << " " <<tiempo << endl;
 }

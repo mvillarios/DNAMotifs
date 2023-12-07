@@ -10,6 +10,7 @@ std::tuple<int, long long> grasp(std::vector<std::string> s, int tam_string, lon
 std::tuple<int, long long> genetico(std::vector<std::string> s, int tam_string, int tam_poblacion, float alpha, long long t_limite, bool tunning);
 std::tuple<int, long long> mh_hibrida(std::vector<std::string> s, int tam_string, long long t_limite, int tunning, int tam_pobl_inicial, float porcentaje_seleccionados, float prob_mutacion, float prob_cruce, float prob_local_search);
 
+std::string localSearch(const std::string& sol_inicial, const std::vector<std::string>& s);
 int menorValorDna(const std::vector<int>& count, float alpha);
 int calcularDistancia(const std::string& str, const std::vector<std::string>& dataset);
 
@@ -36,6 +37,5 @@ void clear_data(std::string file_name);
 
 void allInst (long long t_limite, float alpha, int tam_poblacion, bool tunning, int m, int l, int algoritmo);
 
-std::string localSearch(const std::string& sol_inicial, const std::vector<std::string>& s);
 
 #endif  // FUNCIONES_H

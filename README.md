@@ -42,13 +42,31 @@ Y para ejecutar se usa el ejecutable con el tiempo que se quiere ejecutar el ag 
 
 El codigo imprime en consola el Valor Objetivo y el Tiempo en donde se obtuvo el valor objetivo.
 
+## MH Hibrida
+
+Para compilar se tiene que compilar el archivo mh_hibrida.cpp y el archivo funciones.cpp (recordar estar en la carpeta mh_hibrida)
+
+    g++ mh_hibrida.cpp ../Funciones/funciones.cpp -o mh_hibrida
+
+Y para ejecutar se usa el ejecutable con el tiempo que se quiere ejecutar el mh_hibrida y el nombre del archivo(o el path a la carpeta donde estan las instancias), ademas tiene otros parametros extras.
+
+    ./mh_hibrida.exe -i <nombre archivo> -t <tiempo de ejecucion> -tunning <0/1> -p <tamaño de poblacion> -ps <porcentaje de seleccionados> -pm <probabilidad de mutacion> -pc <probabilidad de cruce> -pls <probabilidad de Busqueda Local>
+
 ## Indicaciones de uso
 
 El tiempo "-t" debe ser mayor a 0 y tiene que ser en segundos
 
 El alpha "-a" debe ser mayor a 0 y menor a 1
 
-El tamaño de poblacion "-p" debe ser mayor a 0
+El tamaño de poblacion "-p" debe ser mayor a 20
+
+El porcentaje de seleccionados "-ps" debe ser mayor a 0.1 y menor a 0.5
+
+La probabilidad de mutacion "-pm" debe ser mayor a 0.1 y menor a 0.3
+
+La probabilidad de cruce "-pc" debe ser mayor a 0.5 y menor a 0.9
+
+La probabilidad de busqueda local "-pls" debe ser mayor a 0.5 y menor a 0.9
 
 El tunning "-tunning" debe ser 0 o 1 (0 imprime resultados por consola, 1 no imprime nada)
 
